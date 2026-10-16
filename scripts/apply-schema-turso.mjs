@@ -35,7 +35,7 @@ if (!url.startsWith("libsql:")) {
 }
 
 const sql = execSync(
-  "npx prisma migrate diff --from-empty --to-schema-datamodel prisma/schema.prisma --script",
+  "npx prisma migrate diff --from-empty --to-schema prisma/schema.prisma --script",
   { encoding: "utf8" },
 );
 

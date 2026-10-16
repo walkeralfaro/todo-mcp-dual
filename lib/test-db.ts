@@ -1,5 +1,5 @@
-import { PrismaClient } from "@prisma/client";
-import { PrismaLibSQL } from "@prisma/adapter-libsql";
+import { PrismaClient } from "./generated/prisma/client";
+import { PrismaLibSql } from "@prisma/adapter-libsql";
 import { createClient } from "@libsql/client";
 
 /**
@@ -20,7 +20,7 @@ export function newTestClient(): PrismaClient {
       "Tests contra Turso: faltan TURSO_DATABASE_URL y/o TURSO_AUTH_TOKEN en el entorno.",
     );
   }
-  const adapter = new PrismaLibSQL({ url, authToken });
+  const adapter = new PrismaLibSql({ url, authToken });
   return new PrismaClient({ adapter });
 }
 

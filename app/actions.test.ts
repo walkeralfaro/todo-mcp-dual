@@ -15,7 +15,7 @@ beforeAll(async () => {
   // Turso si TURSO_* está en el entorno y contaminaría la DB de test compartida.
   delete process.env.TURSO_DATABASE_URL;
   delete process.env.TURSO_AUTH_TOKEN;
-  execSync("npx prisma db push --skip-generate", {
+  execSync("npx prisma db push", {
     env: process.env,
     stdio: "pipe",
   });

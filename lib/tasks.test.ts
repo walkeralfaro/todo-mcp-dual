@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from "./generated/prisma/client";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { createTask, deleteTask, getTask, listTasks, updateTask } from "./tasks";
 import { cleanTasks, newTestClient } from "./test-db";

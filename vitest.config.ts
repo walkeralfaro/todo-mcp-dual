@@ -8,8 +8,9 @@ export default defineConfig({
     include: ["**/*.test.{ts,tsx}"],
     testTimeout: 30000,
     // tasks.test.ts y mcp.test.ts comparten la DB de test de Turso:
-    // un solo worker evita que el DELETE de un fichero borre datos del otro.
-    poolOptions: { forks: { singleFork: true } },
+    // fileParallelism:false = secuencial entre ficheros (poolOptions se
+    // elimino en Vitest 4; este flag ya fuerza maxWorkers=1).
+    fileParallelism: false,
   },
   resolve: {
     alias: { "@": new URL(".", import.meta.url).pathname },

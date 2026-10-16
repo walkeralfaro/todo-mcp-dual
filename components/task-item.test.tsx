@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { Task } from "@prisma/client";
+import type { Task } from "@/lib/generated/prisma/client";
 import { TaskItem } from "@/components/task-item";
 
 vi.mock("next/navigation", () => ({
@@ -9,8 +9,8 @@ vi.mock("next/navigation", () => ({
 }));
 
 const { deleteTaskActionMock, updateTaskActionMock } = vi.hoisted(() => ({
-  deleteTaskActionMock: vi.fn(async () => ({ ok: true })),
-  updateTaskActionMock: vi.fn(async () => ({ ok: true })),
+  deleteTaskActionMock: vi.fn(async (_id: string) => ({ ok: true })),
+  updateTaskActionMock: vi.fn(async (_id: string, _fd: FormData) => ({ ok: true })),
 }));
 
 vi.mock("@/app/actions", () => ({

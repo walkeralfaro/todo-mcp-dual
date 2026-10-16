@@ -1,6 +1,6 @@
 "use client";
 
-import type { Task } from "@prisma/client";
+import type { Task } from "@/lib/generated/prisma/client";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { deleteTaskAction, updateTaskAction } from "@/app/actions";

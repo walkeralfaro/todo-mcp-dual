@@ -32,12 +32,12 @@ AI Agent -> /api/[transport] (mcp-handler)
 
 | Capa | Tecnología |
 | --- | --- |
-| Framework | Next.js 15 App Router, React 19 |
+| Framework | Next.js 16 App Router, React 19 |
 | Estilos | Tailwind CSS 4, shadcn/ui, lucide-react |
-| Persistencia | Prisma 6 + SQLite (`file:../dev.db`), adapter libSQL/Turso para prod |
-| IA | `@modelcontextprotocol/sdk`, `mcp-handler`, `@vercel/mcp-adapter` |
-| Validación | Zod 3 |
-| Tests | Vitest 2, Playwright 1.49 |
+| Persistencia | Prisma 7 + SQLite (`file:../dev.db`), adapter libSQL/Turso para prod |
+| IA | `@modelcontextprotocol/server`, `mcp-handler`, `@vercel/mcp-adapter` |
+| Validación | Zod 4 |
+| Tests | Vitest 5, Playwright 1.64 |
 
 ## Getting Started
 
@@ -188,6 +188,8 @@ components/
   task-form.tsx task-item.tsx task-filters.tsx day-headline.tsx
 lib/
   tasks.ts validators.ts mcp.ts db.ts
+  generated/prisma/  # cliente Prisma 7 (generado, no commitear)
+prisma.config.ts  # datasource URL para el CLI (Prisma 7)
 prisma/schema.prisma
 e2e/todo.spec.ts
 openspec/ requirement.md AGENTS.md

@@ -4,7 +4,7 @@ export const TaskStatusEnum = z.enum(["PENDIENTE", "EN_PROCESO", "COMPLETADA"]);
 export type TaskStatus = z.infer<typeof TaskStatusEnum>;
 
 export const tituloSchema = z
-  .string({ required_error: "El título es obligatorio" })
+  .string({ error: (issue) => (issue.input === undefined ? "El título es obligatorio" : undefined) })
   .trim()
   .min(1, "El título es obligatorio")
   .max(100, "Máximo 100 caracteres");

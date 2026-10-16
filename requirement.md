@@ -11,7 +11,8 @@ Desarrollar una aplicación web de gestión de tareas ("Todo App") moderna que i
 - Tailwind CSS
 - Prisma ORM
 - SQLite
-- @modelcontextprotocol/sdk
+- @modelcontextprotocol/server (v2; antes sdk v1)
+- mcp-handler (v2)
 - @vercel/mcp-adapter
 - Zod
 - Vitest

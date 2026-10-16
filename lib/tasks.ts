@@ -1,4 +1,4 @@
-import type { Prisma, PrismaClient, Task } from "@prisma/client";
+import type { Prisma, PrismaClient, Task } from "./generated/prisma/client";
 import { db, type DbClient } from "./db";
 import {
   createTaskSchema,
