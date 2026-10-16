@@ -38,10 +38,16 @@ const handler = createMcpHandler(
       "create_task",
       {
         title: "Create task",
-        description: "Crea una tarea.",
+        description: "Crea una tarea. Si solo te dan un nombre, envía solo `titulo` y omite `descripcion`.",
         inputSchema: z.object({
           titulo: z.string().min(1).max(100).describe("Título (1-100)"),
-          descripcion: z.string().max(500).optional().describe("Descripción (max 500)"),
+          descripcion: z
+            .string()
+            .max(500)
+            .optional()
+            .describe(
+              "Omitir salvo que el usuario la dé literalmente o pida duplicar el título. No inferir ni copiar `titulo`. (max 500)",
+            ),
           estado: TaskStatusEnum.optional().describe("Estado inicial"),
         }),
       },

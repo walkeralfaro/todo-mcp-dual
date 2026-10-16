@@ -75,4 +75,19 @@ describe("MCP tools", () => {
     const r = await mcpCreateTask({ titulo: "" }, client);
     expect(r.isError).toBe(true);
   });
+
+  it("solo titulo deja descripcion nula sin duplicar", async () => {
+    const r = await mcpCreateTask({ titulo: "Solo titulo" }, client);
+    expect(r.isError).toBeFalsy();
+    const payload = JSON.parse(r.content[0].text);
+    expect(payload.titulo).toBe("Solo titulo");
+    expect(payload.descripcion).toBeNull();
+  });
+
+  it("descripcion explicita se conserva tal cual", async () => {
+    const r = await mcpCreateTask({ titulo: "Con desc", descripcion: "Detalle dado" }, client);
+    expect(r.isError).toBeFalsy();
+    const payload = JSON.parse(r.content[0].text);
+    expect(payload.descripcion).toBe("Detalle dado");
+  });
 });
