@@ -6,14 +6,21 @@
 //
 // Uso (nunca commitear credenciales, salen del entorno):
 //   TURSO_DATABASE_URL="libsql://..." TURSO_AUTH_TOKEN="..." node scripts/apply-schema-turso.mjs
+// En el build se usa con --skip-if-missing: sin TURSO_* avisa y sale 0
+// para no romper builds locales que usan SQLite en archivo.
 
 import { execSync } from "node:child_process";
 import { createClient } from "@libsql/client";
 
+const skipIfMissing = process.argv.includes("--skip-if-missing");
 const url = process.env.TURSO_DATABASE_URL;
 const authToken = process.env.TURSO_AUTH_TOKEN;
 
 if (!url || !authToken) {
+  if (skipIfMissing) {
+    console.log("Sin TURSO_* en el entorno: se omite el esquema Turso.");
+    process.exit(0);
+  }
   console.error(
     "Faltan TURSO_DATABASE_URL y/o TURSO_AUTH_TOKEN en el entorno.",
   );

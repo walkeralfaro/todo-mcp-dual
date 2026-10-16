@@ -24,6 +24,17 @@ El sistema SHALL crear la tabla `Task` en cada DB Turso aplicando el DDL generad
 - **WHEN** se aplica el DDL de Prisma contra la URL de test
 - **THEN** la tabla `Task` existe y `list_tasks` devuelve lista vacía
 
+### Requirement: Creación automática en deploy
+El sistema SHALL garantizar el esquema en cada deploy ejecutando el DDL idempotente (`IF NOT EXISTS`) como parte del build cuando haya credenciales Turso, sin requerir pasos manuales.
+
+#### Scenario: Deploy sin tabla la crea
+- **WHEN** se despliega a Vercel contra una DB sin tabla `Task`
+- **THEN** el build crea la tabla y la home responde 200 en vez de 500
+
+#### Scenario: Build local sin Turso no se interrumpe
+- **WHEN** se ejecuta el build sin `TURSO_DATABASE_URL` definida
+- **THEN** el paso de esquema se omite con aviso y el build continúa igual que antes
+
 ### Requirement: Aislamiento de pruebas por limpieza de tablas
 Cada test SHALL partir de un estado limpio mediante `DELETE FROM Task`, sin borrar ni recrear la base de datos.
 

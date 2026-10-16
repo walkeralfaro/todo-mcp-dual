@@ -75,7 +75,7 @@ DATABASE_URL="file:../dev.db"
   ```bash
   TURSO_DATABASE_URL="libsql://..." TURSO_AUTH_TOKEN="..." node scripts/apply-schema-turso.mjs
   ```
-3. El build ya incluye `prisma generate && next build`; no se corre `db push` en Vercel (el CLI solo acepta `file:`).
+3. El build ya incluye `prisma generate && next build` precedido del esquema idempotente (`--skip-if-missing`: crea la tabla si falta, no toca nada si existe); no hay paso manual de esquema.
 
 ## Usage
 

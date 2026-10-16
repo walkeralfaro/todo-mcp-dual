@@ -21,6 +21,7 @@ Ver `proposal.md` (Why). Estado actual: `lib/db.ts` ya conmuta a Turso si hay `T
 - **Reutilizar switch existente en `lib/db.ts`, extraer helper de test.** Alternativa: duplicar construcción del cliente en cada test. Se descarta por duplicación; un helper `newTestClient()` en tests (o `lib/test-db.ts`) centraliza adapter + limpieza.
 - **`db push` del CLI no llega a Turso; se aplica el DDL generado por Prisma.** Alternativa: `migrate deploy` en Vercel. Ambas se descartan porque el CLI valida `url` como `file:` (error P1012 con `libsql://`) y el adapter libsql solo sirve en runtime; el `build` queda en `prisma generate && next build`. El mecanismo es: `prisma migrate diff --from-empty --to-schema-datamodel prisma/schema.prisma --script` (Prisma sigue siendo fuente de verdad) + script `scripts/apply-schema-turso.mjs` que ejecuta ese SQL vía `@libsql/client` con `IF NOT EXISTS` para idempotencia.
 - **Mismo nombre de var en cada entorno, distinto valor.** Local `.env` = test, Vercel dashboard = prod, ambos `TURSO_DATABASE_URL` / `TURSO_AUTH_TOKEN`. Alternativa: nombres distintos por entorno (`TURSO_TEST_*`). Se descarta porque obligaría a ramificar `db.ts`; la convención mismo-nombre evita errores de código.
+- **El esquema se garantiza en el build, no solo manual una vez.** `build` = `apply-schema-turso.mjs --skip-if-missing && prisma generate && next build`. Idempotente (`IF NOT EXISTS`): en deploys normales no toca nada; si falta la tabla, la crea y evita el 500. En local sin `TURSO_*` se omite con aviso. Alternativa (runtime en `instrumentation.ts`): descartada por DDL en caliente y latencia en cold-starts.
 - **Playwright: webServer sin `rm`, con limpieza previa por script.** Alternativa: DB efímera por run. Se descarta (coste/complejidad); `fullyParallel: false` ya serializa, basta limpiar tabla al inicio del run global o en fixture.
 - **Timeouts Vitest ya en 30s (`vitest.config.ts`), mantener.** Alternativa: subir timeouts. Solo si la latencia Turso lo exige tras primera corrida.
 
@@ -37,5 +38,5 @@ Ver `proposal.md` (Why). Estado actual: `lib/db.ts` ya conmuta a Turso si hay `T
 1. Backup: nada que migrar (arranque vacío acordado); `dev.db`/`e2e.db` quedan como respaldo local ignorado.
 2. Push esquema a test con `scripts/apply-schema-turso.mjs`, verificar lista vacía.
 3. Adaptar harness Vitest + Playwright, primera corrida verde contra test.
-4. Configurar `TURSO_DATABASE_URL`/`TURSO_AUTH_TOKEN` de prod en Vercel (dashboard, entornos Production/Preview), aplicar esquema a prod con el mismo script, deploy y humo `list_tasks`.
+4. Configurar `TURSO_DATABASE_URL`/`TURSO_AUTH_TOKEN` de prod en Vercel (dashboard, entornos Production/Preview); el build aplica el esquema solo (idempotente, `--skip-if-missing` en local sin Turso), deploy y humo `list_tasks`.
 5. Rollback: si Turso-test falla, volver a `DATABASE_URL` local quitando `TURSO_*` del `.env` (cero cambios de código); prod no se toca hasta el deploy verificado.

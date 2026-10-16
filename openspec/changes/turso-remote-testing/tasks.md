@@ -21,6 +21,7 @@
 
 - [ ] 4.1 Configurar `TURSO_DATABASE_URL`/`TURSO_AUTH_TOKEN` de prod en dashboard Vercel (Production/Preview) y verificar que aparecen definidas sin exponer valores en el repo
 - [ ] 4.2 Aplicar esquema a Turso-prod con `scripts/apply-schema-turso.mjs` y verificar tabla `Task` vacía sin alterar conteo de test
+- [x] 4.4 Automatizar esquema en el build (`--skip-if-missing`, idempotente) y verificar build local con y sin `TURSO_*`
 - [x] 4.3 Documentar pasos de deploy (envs + push + build `prisma generate && next build`) en `README.md`/docs y verificar que los comandos documentados corren como están escritos
 
 ## 5. Verificación integrada
