@@ -1,0 +1,12 @@
+node_modules/
+.next/
+out/
+*.db
+*.db-journal
+.env
+.opencode/
+.playwright-cli/
+.taste-skill/
+!.env.example
+playwright-report/
+test-results/
