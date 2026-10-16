@@ -11,6 +11,10 @@ let actions: typeof import("./actions");
 beforeAll(async () => {
   const dir = mkdtempSync(join(tmpdir(), "todo-actions-"));
   process.env.DATABASE_URL = `file:${join(dir, "test.db")}`;
+  // Este spec queda aislado en archivo local: sin esto, lib/db.ts preferiría
+  // Turso si TURSO_* está en el entorno y contaminaría la DB de test compartida.
+  delete process.env.TURSO_DATABASE_URL;
+  delete process.env.TURSO_AUTH_TOKEN;
   execSync("npx prisma db push --skip-generate", {
     env: process.env,
     stdio: "pipe",

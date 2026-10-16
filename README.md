@@ -59,13 +59,23 @@ Variables de entorno (`.env.example`):
 
 ```bash
 DATABASE_URL="file:../dev.db"
-# Producción con Turso:
+# Turso (ver lib/db.ts: si existe TURSO_DATABASE_URL se usa Turso).
+# Local = credenciales de TEST; Vercel = credenciales de PROD. Los tests NUNCA tocan prod.
 # TURSO_DATABASE_URL="libsql://..."
 # TURSO_AUTH_TOKEN="..."
 ```
 
 > [!TIP]
-> E2E usa su propia DB: `playwright.config.ts` arranca con `DATABASE_URL="file:../e2e.db"` y hace `prisma db push` antes de levantar el server.
+> E2E corre contra Turso-test: `playwright.config.ts` limpia la tabla `Task` y levanta el server con `TURSO_*` del entorno. Lanza con `set -a; source .env; npx playwright test`.
+
+## Deploy a Vercel (Turso prod)
+
+1. En el dashboard de Vercel (Production + Preview) define `TURSO_DATABASE_URL` y `TURSO_AUTH_TOKEN` con la DB de **prod**.
+2. Aplica el esquema a prod una vez (desde tu máquina, sin commitear credenciales):
+  ```bash
+  TURSO_DATABASE_URL="libsql://..." TURSO_AUTH_TOKEN="..." node scripts/apply-schema-turso.mjs
+  ```
+3. El build ya incluye `prisma generate && next build`; no se corre `db push` en Vercel (el CLI solo acepta `file:`).
 
 ## Usage
 
@@ -147,19 +157,22 @@ model Task {
 npm run dev       # desarrollo
 npm run build     # prisma generate + next build
 npm start         # producción
-npm test          # Vitest unitario/integración
+npm test          # Vitest (contra Turso-test: set -a; source .env primero)
 npm run test:watch
-npx playwright test  # E2E (usa e2e.db)
-npx prisma db push   # sincronizar schema SQLite
+npx playwright test  # E2E (contra Turso-test, limpia Task antes de arrancar)
+npx prisma db push   # sincronizar schema SQLite local
+node scripts/apply-schema-turso.mjs  # aplicar esquema a Turso (con TURSO_* en entorno)
+node scripts/clean-turso-test.mjs    # vaciar Task en Turso-test
 ```
 
 ## Testing
 
-- `lib/validators.test.ts`, `lib/tasks.test.ts`, `lib/mcp.test.ts`, `app/actions.test.ts` — Vitest con SQLite.
-- `e2e/todo.spec.ts`, `components/task-item.test.tsx` — flujo crear/listar/actualizar.
-- `app/api/[transport]/route.test.ts` — handler MCP.
+- `lib/validators.test.ts`, `app/actions.test.ts`, `app/api/[transport]/route.test.ts`, `components/task-item.test.tsx` — sin Turso (local/mocks).
+- `lib/tasks.test.ts`, `lib/mcp.test.ts` — integración contra Turso-test con limpieza por `DELETE FROM Task` (helper `lib/test-db.ts`).
+- `e2e/todo.spec.ts` — flujo crear/listar/actualizar contra Turso-test.
 
 ```bash
+set -a; source .env   # expone TURSO_* de TEST (Vitest/Playwright no leen .env solos)
 npm test
 npx playwright test
 ```
@@ -183,5 +196,7 @@ openspec/ requirement.md AGENTS.md
 ## Troubleshooting
 
 - `DATABASE_URL` no encontrada: copia `.env.example` a `.env`, default `file:../dev.db` en `lib/db.ts:16`.
-- DB vacía / schema desactualizado: `npx prisma db push`.
+- DB vacía / schema desactualizado (local): `npx prisma db push`.
+- `P1012 the URL must start with file:` al apuntar a Turso: esperado, el CLI no soporta `libsql://`. Usa `node scripts/apply-schema-turso.mjs` con `TURSO_*` en entorno.
+- Tests contra Turso fallan con "faltan TURSO_*": Vitest no lee `.env` solo; lanza con `set -a; source .env` antes.
 - E2E falla por puerto ocupado: Playwright usa `reuseExistingServer: false`, cierra `npm run dev` en puerto 3000 antes de `npx playwright test`.

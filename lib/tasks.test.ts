@@ -1,22 +1,17 @@
-import { execSync } from "node:child_process";
-import { mkdtempSync } from "node:fs";
-import { tmpdir } from "node:os";
-import { join } from "node:path";
 import { PrismaClient } from "@prisma/client";
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { createTask, deleteTask, getTask, listTasks, updateTask } from "./tasks";
+import { cleanTasks, newTestClient } from "./test-db";
 
 let client: PrismaClient;
-let url: string;
 
 beforeAll(() => {
-  const dir = mkdtempSync(join(tmpdir(), "todo-test-"));
-  url = `file:${join(dir, "test.db")}`;
-  execSync("npx prisma db push --skip-generate", {
-    env: { ...process.env, DATABASE_URL: url },
-    stdio: "pipe",
-  });
-  client = new PrismaClient({ datasourceUrl: url });
+  // La DB de test de Turso ya tiene el esquema (scripts/apply-schema-turso.mjs).
+  client = newTestClient();
+});
+
+beforeEach(async () => {
+  await cleanTasks(client);
 });
 
 afterAll(async () => {
