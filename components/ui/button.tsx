@@ -3,8 +3,14 @@ import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
+// Mapa de intención (reutilizar en nuevos features):
+// - primaria (Crear, Guardar): variant="default" size="default"|"sm"
+// - secundaria / neutra (Cancelar, filtros): variant="secondary"|"outline"
+// - sutil en fila (Editar, limpiar búsqueda): variant="ghost" size="sm"|"icon"
+// - destructiva (Eliminar fila, Confirmar borrado): variant="destructive" (sólida en diálogo)
+//   o ghost + text-destructive solo en fila densa si el sólido pesa demasiado.
 const buttonVariants = cva(
-  "inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-md text-base font-medium transition-[color,background-color,transform] duration-150 outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-ground active:scale-[0.97] disabled:pointer-events-none disabled:opacity-50 aria-invalid:ring-destructive/20 aria-invalid:border-destructive [&_svg]:pointer-events-none [&_svg]:shrink-0",
+  "inline-flex shrink-0 touch-manipulation items-center justify-center gap-2 whitespace-nowrap rounded-md text-base font-medium transition-[color,background-color,transform] duration-150 outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-ground active:scale-[0.97] disabled:pointer-events-none disabled:opacity-50 aria-invalid:ring-destructive/20 aria-invalid:border-destructive [&_svg]:pointer-events-none [&_svg]:shrink-0",
   {
     variants: {
       variant: {
@@ -12,6 +18,7 @@ const buttonVariants = cva(
         secondary: "bg-surface text-ink hover:bg-surface/80",
         outline: "border border-ink/15 bg-ground hover:bg-surface",
         ghost: "hover:bg-surface hover:text-ink",
+        destructive: "bg-destructive text-ground hover:bg-destructive/90",
       },
       size: {
         default: "h-9 px-4 py-2",

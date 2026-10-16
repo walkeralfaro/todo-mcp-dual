@@ -87,7 +87,13 @@ export function TaskForm(): React.JSX.Element {
             />
             <FieldDescription id="new-desc-desc">Opcional, hasta 500 caracteres.</FieldDescription>
           </Field>
-          <Button type="submit" data-testid="create-btn" disabled={pending} aria-busy={pending}>
+          <Button
+            type="submit"
+            data-testid="create-btn"
+            disabled={pending}
+            aria-busy={pending}
+            className="min-h-11 sm:min-h-0"
+          >
             {pending && <Spinner data-icon="inline-start" />}
             {pending ? "Creando…" : "Crear tarea"}
           </Button>

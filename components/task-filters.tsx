@@ -89,7 +89,7 @@ export function TaskFilters({ estado, q, total }: { estado: string; q: string; t
                 size="icon"
                 onClick={clearSearch}
                 aria-label="Limpiar búsqueda"
-                className="size-7 shrink-0"
+                className="size-11 shrink-0"
               >
                 <X aria-hidden="true" />
               </Button>

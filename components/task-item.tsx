@@ -4,6 +4,8 @@ import type { Task } from "@prisma/client";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { deleteTaskAction, updateTaskAction } from "@/app/actions";
+import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -96,6 +98,8 @@ export function TaskItem({ task }: { task: Task }) {
           <input
             data-testid="edit-title"
             aria-label="Editar título"
+            name="titulo-editar"
+            autoComplete="off"
             className="border border-ink/15 bg-ground px-3 py-2 text-[16px]"
             value={title}
             maxLength={100}
@@ -104,6 +108,8 @@ export function TaskItem({ task }: { task: Task }) {
           <input
             data-testid="edit-desc"
             aria-label="Editar descripción"
+            name="descripcion-editar"
+            autoComplete="off"
             className="border border-ink/15 bg-ground px-3 py-2 text-[16px]"
             value={desc}
             maxLength={500}
@@ -111,7 +117,7 @@ export function TaskItem({ task }: { task: Task }) {
           />
         </div>
       )}
-      <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 rounded-md bg-surface/40 px-3 py-1">
+      <div className="mt-3 flex flex-wrap items-center gap-2 rounded-md bg-surface/40 px-3 py-2">
         <Select value={task.estado} onValueChange={changeEstado} disabled={pending}>
           <SelectTrigger
             data-testid="status-select"
@@ -131,18 +137,24 @@ export function TaskItem({ task }: { task: Task }) {
           </SelectContent>
         </Select>
         {!editing ? (
-          <button
+          <Button
             data-testid="edit-btn"
-            className="px-1 py-2 text-[15px] text-muted transition-colors duration-150 hover:text-ink"
+            variant="ghost"
+            size="sm"
+            aria-label="Editar tarea"
+            className="min-h-11 text-[15px] text-muted hover:text-ink sm:min-h-0"
             onClick={() => setEditing(true)}
           >
             Editar
-          </button>
+          </Button>
         ) : (
-          <button
+          <Button
             data-testid="save-btn"
+            variant="default"
+            size="sm"
             disabled={pending}
-            className="bg-accent px-4 py-2 text-[15px] font-medium text-ground disabled:opacity-50"
+            aria-busy={pending}
+            className="min-h-11 text-[15px] sm:min-h-0"
             onClick={() =>
               start(async () => {
                 await updateTaskAction(task.id, fd({ titulo: title, descripcion: desc }));
@@ -151,18 +163,21 @@ export function TaskItem({ task }: { task: Task }) {
               })
             }
           >
+            {pending && <Spinner data-icon="inline-start" />}
             Guardar
-          </button>
+          </Button>
         )}
         <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
           <AlertDialogTrigger asChild>
-            <button
+            <Button
               data-testid="delete-btn"
+              variant="ghost"
+              size="sm"
               disabled={pending}
-              className="px-1 py-2 text-[15px] text-destructive transition-opacity duration-150 hover:opacity-80 disabled:opacity-50"
+              className="min-h-11 text-[15px] text-destructive hover:bg-destructive/10 hover:text-destructive sm:min-h-0"
             >
               Eliminar
-            </button>
+            </Button>
           </AlertDialogTrigger>
           <AlertDialogContent size="sm">
             <AlertDialogHeader>
@@ -172,10 +187,12 @@ export function TaskItem({ task }: { task: Task }) {
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel data-testid="delete-cancel">Cancelar</AlertDialogCancel>
+              <AlertDialogCancel data-testid="delete-cancel" variant="outline">
+                Cancelar
+              </AlertDialogCancel>
               <AlertDialogAction
                 data-testid="delete-confirm"
-                className="bg-destructive text-ground hover:bg-destructive/90"
+                variant="destructive"
                 onClick={confirmDelete}
               >
                 Eliminar

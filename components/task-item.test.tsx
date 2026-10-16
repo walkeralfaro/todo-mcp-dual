@@ -70,6 +70,36 @@ describe("TaskItem shadcn", () => {
   });
 });
 
+describe("TaskItem acciones Button shadcn", () => {
+  it("Editar/Guardar/Eliminar usan Button con data-slot y sin window.confirm", () => {
+    const confirmSpy = vi.spyOn(window, "confirm").mockReturnValue(true);
+    render(<TaskItem task={makeTask()} />);
+    for (const id of ["edit-btn", "delete-btn"]) {
+      const btn = screen.getByTestId(id);
+      expect(btn.tagName).toBe("BUTTON");
+      expect(btn.className).toContain("inline-flex");
+      expect(btn.className).toContain("rounded-md");
+      expect(btn.className).toContain("focus-visible:ring-2");
+    }
+    expect(screen.getByTestId("edit-btn").getAttribute("data-slot")).toBe("button");
+    expect(confirmSpy).not.toHaveBeenCalled();
+    confirmSpy.mockRestore();
+  });
+
+  it("editar título y guardar llama a update con Button", async () => {
+    render(<TaskItem task={makeTask()} />);
+    fireEvent.click(screen.getByTestId("edit-btn"));
+    const title = screen.getByTestId("edit-title");
+    fireEvent.change(title, { target: { value: "Nuevo titulo" } });
+    fireEvent.click(screen.getByTestId("save-btn"));
+    await waitFor(() => {
+      expect(updateTaskActionMock).toHaveBeenCalled();
+    });
+    const fd = updateTaskActionMock.mock.calls[0][1] as FormData;
+    expect(fd.get("titulo")).toBe("Nuevo titulo");
+  });
+});
+
 describe("TaskItem card", () => {
   it("la tarjeta se distingue del fondo en reposo", () => {
     render(<TaskItem task={makeTask()} />);
