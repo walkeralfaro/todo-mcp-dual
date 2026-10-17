@@ -36,7 +36,7 @@ function DialogOverlay({
     <DialogPrimitive.Overlay
       data-slot="dialog-overlay"
       className={cn(
-        "fixed inset-0 z-50 bg-black/50 duration-200 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0",
+        "fixed inset-0 z-50 bg-black/50 duration-200 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=closed]:pointer-events-none",
         className
       )}
       {...props}
@@ -58,7 +58,12 @@ function DialogContent({
         data-slot="dialog-content"
         data-size={size}
         className={cn(
-          "group/dialog-content fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-md border border-ink/10 bg-elevated p-6 shadow-lg duration-[250ms] ease-out-modal data-[size=sm]:max-w-xs data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 data-[size=default]:sm:max-w-lg",
+          // Sin animación de salida en el contenido: Radix mantiene el
+          // DismissableLayer montado mientras dura el exit y un clic de
+          // reapertura dentro de esa ventana era anulado por un dismiss
+          // diferido del layer viejo (deferPointerDownOutside). El overlay
+          // conserva su fade-out con pointer-events-none.
+          "group/dialog-content fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-md border border-ink/10 bg-elevated p-6 shadow-lg ease-out-modal data-[size=sm]:max-w-xs data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 data-[state=open]:duration-[250ms] data-[size=default]:sm:max-w-lg",
           className
         )}
         {...props}

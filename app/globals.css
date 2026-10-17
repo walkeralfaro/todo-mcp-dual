@@ -53,11 +53,205 @@ html {
   animation: headline-pulse 250ms var(--ease-out-modal);
 }
 
+/* --- Landing: fragmentos reales de la interfaz (data-ui) ---
+   Un fragmento conserva sus convenciones de producto (bordes finos,
+   controles, radios pequeños); la página que lo rodea sigue las reglas
+   generales. El CSS de fragmentos vive bajo el selector [data-ui]. */
+[data-ui] {
+  --ui-line: color-mix(in srgb, var(--color-ink) 14%, transparent);
+}
+[data-ui] .ui-card {
+  background-color: var(--color-elevated);
+  border: 1px solid var(--ui-line);
+  border-radius: 0.375rem;
+}
+[data-ui] .ui-control {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75em;
+  height: 2.75em;
+  padding-inline: 0.875em;
+  background-color: var(--color-ground);
+  border: 1px solid var(--ui-line);
+  border-radius: 0.375rem;
+}
+[data-ui] .ui-chip {
+  display: inline-flex;
+  align-items: center;
+  height: 2em;
+  padding-inline: 0.75em;
+  border-radius: 0.375rem;
+  background-color: var(--color-elevated);
+  color: var(--color-ink);
+  white-space: nowrap;
+}
+[data-ui] .ui-dialog {
+  background-color: var(--color-elevated);
+  border: 1px solid var(--ui-line);
+  border-radius: 0.5rem;
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.45);
+}
+[data-ui] .ui-code {
+  display: block;
+  overflow-x: auto;
+  padding: 0.75em;
+  border-radius: 0.375rem;
+  background-color: var(--color-ground);
+  color: var(--color-ink);
+  font-size: 0.9em;
+  line-height: 1.7;
+}
+[data-ui] .ui-block {
+  display: inline-flex;
+  align-items: center;
+  height: 1.75em;
+  padding-inline: 0.625em;
+  border-radius: 0.25rem;
+  font-size: 0.85em;
+  font-weight: 500;
+  white-space: nowrap;
+}
+/* Tira fusionada al pie de un fragmento: una línea real de 13px. */
+[data-ui] .ui-strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  height: 1.75rem;
+  padding-inline: 0.75rem;
+  font-size: 13px;
+  line-height: 1;
+}
+/* Barras de herramientas: summary de 56px sin marcador, panel debajo. */
+[data-ui] .ui-bar summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  height: 3.5rem;
+  padding-inline: 1.125rem;
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+}
+[data-ui] .ui-bar summary::-webkit-details-marker {
+  display: none;
+}
+[data-ui] .ui-bar summary::marker {
+  content: "";
+}
+[data-ui] .ui-bar .ui-plus {
+  display: inline-block;
+  transition: transform 200ms var(--ease-out-modal);
+}
+[data-ui] .ui-bar[open] .ui-plus {
+  transform: rotate(45deg);
+}
+/* La tira de estado/comportamiento de la demo: entrada de fila nueva. */
+@keyframes row-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.animate-row-in {
+  animation: row-in 240ms var(--ease-out-modal);
+}
+/* El contador del día respira: el único elemento en movimiento continuo. */
+@keyframes breathe {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+.animate-breathe {
+  animation: breathe 3.4s ease-in-out infinite;
+}
+
+/* `web-interface-guidelines`: el tema oscuro pide `color-scheme: dark` en el
+   <html> para que los controles nativos (scrollbar, inputs, selects) se
+   comporten como oscuros con la página */
+html {
+  color-scheme: dark;
+}
+
+/* --- Landing: entrada escenificada por sección ---
+   Solo con JS activo (`data-motion`) y solo transform/opacity; sin
+   `data-motion` todo el contenido queda visible. */
+html[data-motion] [data-reveal] {
+  opacity: 0;
+  /* ≤ la separación de la retícula (6–8 px): la entrada nunca pisa al
+     vecino que ya está asentado. */
+  transform: translateY(8px);
+  will-change: opacity, transform;
+}
+html[data-motion] [data-reveal].is-in {
+  opacity: 1;
+  transform: none;
+  will-change: auto;
+  transition:
+    opacity 300ms var(--ease-out-modal),
+    transform 300ms var(--ease-out-modal);
+}
+
+/* La fila abierta del tablero se abre con el gesto firma (shutter). */
+@keyframes shutter-open {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+@keyframes shutter-settle {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.animate-shutter {
+  animation: shutter-open 1.1s var(--ease-out-modal);
+}
+.animate-shutter-settle {
+  animation: shutter-settle 400ms 220ms var(--ease-out-modal) backwards;
+}
+
+/* Palabra gigante de la sección de herramientas: llena su columna. */
+.tools-column {
+  container-type: inline-size;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {  *,
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+  html[data-motion] [data-reveal] {
+    opacity: 1;
+    transform: none;
+  }
+  .animate-shutter,
+  .animate-shutter-settle {
+    animation: none;
   }
 }

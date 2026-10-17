@@ -2,14 +2,18 @@ import { createHash } from "node:crypto";
 import { describe, expect, it, beforeEach, afterEach } from "vitest";
 import { POST } from "./route";
 import { db } from "@/lib/db";
+import { createMcpToken } from "@/lib/mcp-tokens";
 
 const TEST_TOKEN = "token-de-prueba-mcp-12345";
 const TEST_TOKEN_HASH = createHash("sha256").update(TEST_TOKEN).digest("hex");
 let testUserId: string;
 
-async function authenticate(request: Request): Promise<Response> {
+async function authenticate(
+  request: Request,
+  bearer: string = TEST_TOKEN,
+): Promise<Response> {
   const headers = new Headers(request.headers);
-  headers.set("authorization", `Bearer ${TEST_TOKEN}`);
+  headers.set("authorization", `Bearer ${bearer}`);
   if (request.method === "POST") {
     const body = await request.clone().json();
     return POST(new Request(request.url, {
@@ -21,7 +25,11 @@ async function authenticate(request: Request): Promise<Response> {
   return POST(new Request(request.url, { method: request.method, headers }));
 }
 
-async function rpc(method: string, params: unknown = {}) {
+async function rpc(
+  method: string,
+  params: unknown = {},
+  bearer: string = TEST_TOKEN,
+) {
   const req = new Request("http://localhost/api/mcp", {
     method: "POST",
     headers: {
@@ -30,7 +38,7 @@ async function rpc(method: string, params: unknown = {}) {
     },
     body: JSON.stringify({ jsonrpc: "2.0", id: 1, method, params }),
   });
-  const res = await authenticate(req);
+  const res = await authenticate(req, bearer);
   const text = await res.text();
   const json = text
     .split("\n")
@@ -90,5 +98,34 @@ describe("MCP route handler", () => {
   it("GET responde sin error de método", async () => {
     const res = await authenticate(new Request("http://localhost/api/mcp", { method: "GET" }));
     expect([200, 400, 405]).toContain(res.status);
+  });
+});
+
+describe("autenticación con tokens generados por lib/mcp-tokens", () => {
+  it("autentica tools y actualiza lastUsedAt", async () => {
+    const { token, record } = await createMcpToken(testUserId);
+
+    const { status, events } = await rpc("tools/list", {}, token);
+    expect(status).toBe(200);
+    const names = events
+      .flatMap((e) => e.result?.tools ?? [])
+      .map((t: { name: string }) => t.name);
+    expect(names).toContain("list_tasks");
+
+    const actualizado = await db.mcpToken.findUnique({
+      where: { id: record.id },
+    });
+    expect(actualizado?.lastUsedAt).not.toBeNull();
+  });
+
+  it("rechaza con 401 un token expirado", async () => {
+    const { token, record } = await createMcpToken(testUserId);
+    await db.mcpToken.update({
+      where: { id: record.id },
+      data: { expiresAt: new Date(Date.now() - 1000) },
+    });
+
+    const { status } = await rpc("tools/list", {}, token);
+    expect(status).toBe(401);
   });
 });

@@ -1,5 +1,5 @@
-import { createHash } from "node:crypto";
 import { db } from "./db";
+import { hashMcpToken } from "./mcp-tokens";
 
 /**
  * Autentica un cliente MCP mediante Bearer token (Opción B).
@@ -14,7 +14,7 @@ export async function authenticateMcpBearer(request: Request): Promise<string | 
   const token = auth.slice("Bearer ".length).trim();
   if (!token) return null;
 
-  const hash = createHash("sha256").update(token).digest("hex");
+  const hash = hashMcpToken(token);
   const mcpToken = await db.mcpToken.findFirst({ where: { token: hash } });
   if (!mcpToken) return null;
   if (mcpToken.expiresAt && mcpToken.expiresAt < new Date()) return null;

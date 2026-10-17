@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -15,6 +16,7 @@ import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { authClient } from "@/lib/auth-client";
 import { authErrorToMessage } from "@/lib/auth-error";
+import { postAuthPath } from "@/lib/auth-redirect";
 
 export type AuthTab = "login" | "register";
 
@@ -26,6 +28,11 @@ export interface AuthModalProps {
   onTabChange: (tab: AuthTab) => void;
   onAuthSuccess?: () => void;
   onAuthError?: (message: string) => void;
+  /**
+   * Ruta local a la que volver tras autenticarse (viene del redirect de
+   * protección). Se valida con `postAuthPath`: si no es local, `/tareas`.
+   */
+  next?: string | null;
 }
 
 /**
@@ -41,7 +48,9 @@ export function AuthModal({
   onTabChange,
   onAuthSuccess,
   onAuthError,
+  next,
 }: AuthModalProps): React.JSX.Element {
+  const router = useRouter();
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [email, setEmail] = useState("");
@@ -81,6 +90,15 @@ export function AuthModal({
         return;
       }
       onAuthSuccess?.();
+      // Vuelve a la ruta solicitada por el redirect de protección (validada
+      // como local) o a la app por defecto. Si ya estamos en esa ruta, basta
+      // refrescar el RSC: push + refresh seguidos pueden abortar la navegación.
+      const target = postAuthPath(next);
+      if (window.location.pathname === target.split("?")[0]) {
+        router.refresh();
+      } else {
+        router.push(target);
+      }
     } catch (e) {
       const message = "Error de autenticación. Inténtalo de nuevo.";
       setError(message);
@@ -95,7 +113,7 @@ export function AuthModal({
     try {
       const { error: authError } = await authClient.signIn.social({
         provider: "google",
-        callbackURL: "/",
+        callbackURL: postAuthPath(next),
       });
       if (authError) {
         setError(authErrorToMessage(authError));

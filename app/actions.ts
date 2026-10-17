@@ -28,7 +28,7 @@ export async function createTaskAction(formData: FormData): Promise<ActionResult
       descripcion: formData.get("descripcion") ? String(formData.get("descripcion")) : undefined,
     });
     await createTask({ ...parsed, userId });
-    revalidatePath("/");
+    revalidatePath("/tareas");
     return { ok: true };
   } catch (e) {
     return err(e);
@@ -47,7 +47,7 @@ export async function updateTaskAction(id: string, formData: FormData): Promise<
       estado: rawEstado ? String(rawEstado) : undefined,
     });
     await updateTask(parsedId, parsed, userId);
-    revalidatePath("/");
+    revalidatePath("/tareas");
     return { ok: true };
   } catch (e) {
     return err(e);
@@ -60,7 +60,7 @@ export async function deleteTaskAction(id: string): Promise<ActionResult> {
     if (!userId) return { ok: false, error: "No autenticado" };
     const parsedId = taskIdSchema.parse(id);
     await deleteTask(parsedId, userId);
-    revalidatePath("/");
+    revalidatePath("/tareas");
     return { ok: true };
   } catch (e) {
     return err(e);

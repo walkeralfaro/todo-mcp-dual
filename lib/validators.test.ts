@@ -3,6 +3,7 @@ import {
   createTaskSchema,
   descripcionSchema,
   listTasksSchema,
+  mcpTokenIdSchema,
   tituloSchema,
   updateTaskSchema,
 } from "./validators";
@@ -42,5 +43,20 @@ describe("validators", () => {
   it("update parcial acepta solo estado", () => {
     const r = updateTaskSchema.safeParse({ estado: "COMPLETADA" });
     expect(r.success).toBe(true);
+  });
+
+  it("rechaza id de token vacío con mensaje en español", () => {
+    const r = mcpTokenIdSchema.safeParse("   ");
+    expect(r.success).toBe(false);
+    if (!r.success) {
+      expect(r.error.issues[0].message).toBe(
+        "El id del token es obligatorio",
+      );
+    }
+  });
+
+  it("acepta id de token válido y recorta espacios", () => {
+    const r = mcpTokenIdSchema.parse(" token-123 ");
+    expect(r).toBe("token-123");
   });
 });

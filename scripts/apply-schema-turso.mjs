@@ -9,6 +9,8 @@
 // `userId`): por defecto el script falla alto anunciando las que diferencian
 // del esquema; con `--recreate-outdated` las DROP+CREATE (opt-in: el mismo
 // script corre en builds de Vercel y no debe borrar datos silenciosamente).
+// Las columnas posteriores al esquema inicial (aditivas, sin pérdida) de
+// `additiveColumns` se añaden antes con ALTER TABLE idempotente.
 //
 // Uso (nunca commitear credenciales, salen del entorno):
 //   TURSO_DATABASE_URL="libsql://..." TURSO_AUTH_TOKEN="..." node scripts/apply-schema-turso.mjs
@@ -85,6 +87,24 @@ function expectedColumns(stmt) {
 
 const client = createClient({ url, authToken });
 try {
+  // Columnas aditivas posteriores al esquema inicial (sin pérdida de datos):
+  // se añaden por introspección antes de la detección de tablas desalineadas.
+  const additiveColumns = [
+    {
+      table: "mcp_token",
+      column: "tokenPrefix",
+      ddl: 'ALTER TABLE "mcp_token" ADD COLUMN "tokenPrefix" TEXT',
+    },
+  ];
+  for (const { table, column, ddl } of additiveColumns) {
+    const info = await client.execute(`PRAGMA table_info("${table}")`);
+    if (info.rows.length === 0) continue; // no existe: la crea el CREATE TABLE
+    if (!info.rows.some((r) => String(r.name) === column)) {
+      console.log(`Añadiendo columna ${table}.${column}`);
+      await client.execute(ddl);
+    }
+  }
+
   // Detectar tablas existentes desalineadas con el esquema esperado.
   const creates = statements.filter((s) => s.startsWith("CREATE TABLE"));
   const outdated = [];

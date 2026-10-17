@@ -7,8 +7,10 @@ Una app moderna de gestión de tareas donde humanos y agentes de IA operan sobre
 ## Features
 
 - Lista de tareas con filtros por estado (`TODAS`, `PENDIENTE`, `EN_PROCESO`, `COMPLETADA`) y búsqueda `?q=`.
+- Landing pública en `/`; la app de tareas vive en `/tareas` y los tokens MCP en `/mcp` (ambas protegidas por sesión).
 - Creación, actualización de estado y borrado desde UI con Server Actions.
 - Servidor MCP con 5 tools CRUD para agentes externos.
+- Tokens de acceso MCP por usuario: se generan en `/mcp`, el valor se muestra una sola vez, se persiste solo su hash SHA-256, expiran a los 90 días y se revocan de inmediato.
 - Estado único: sin duplicar lógica de negocio, UI y MCP comparten `lib/tasks.ts` + SQLite.
 - Validación estricta con Zod en Server Actions y tools MCP.
 - `fechaCulminada` automática al pasar a `COMPLETADA`, se limpia al salir de ese estado.
@@ -81,19 +83,24 @@ DATABASE_URL="file:../dev.db"
 
 ### UI
 
-- `/?estado=TODAS` — todas (default)
-- `/?estado=PENDIENTE& q=texto` — filtro + búsqueda en título/descripción
+- `/` — landing pública (presentación y acceso con sesión).
+- `/tareas` — app de tareas (protegida): lista + filtros + formulario.
+- `/mcp` — tokens MCP (protegida): generar, copiar una vez y revocar.
+- `/tareas?estado=PENDIENTE&q=texto` — filtro + búsqueda en título/descripción.
 - Crear desde `components/task-form.tsx`, cambiar estado / borrar desde `components/task-item.tsx`
 
 ### MCP
 
-Endpoint base: `/api` con transporte dinámico (`app/api/[transport]/route.ts`).
+Endpoint base: `/api` con transporte dinámico (`app/api/[transport]/route.ts`). Todas las peticiones exigen un token de acceso: se genera en `/mcp` con la sesión iniciada, se muestra una sola vez y se envía como `Authorization: Bearer <token>`.
 
 Ejemplo con `curl` (Streamable HTTP):
 
 ```bash
+# MCP_TOKEN=tmcp_... (generado en http://localhost:3000/mcp)
 curl -X POST http://localhost:3000/api/mcp \
+  -H "Authorization: Bearer $MCP_TOKEN" \
   -H "Content-Type: application/json" \
+  -H "Accept: application/json, text/event-stream" \
   -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'
 ```
 
@@ -102,10 +109,15 @@ Configuración ejemplo para cliente MCP:
 ```json
 {
   "mcpServers": {
-    "todo-mcp": { "url": "http://localhost:3000/api/mcp" }
+    "todo-mcp": {
+      "url": "http://localhost:3000/api/mcp",
+      "headers": { "Authorization": "Bearer tmcp_..." }
+    }
   }
 }
 ```
+
+Los tokens se persisten como hash SHA-256 (`McpToken.token`) con prefijo visible (`tokenPrefix`) y `expiresAt` a 90 días. Revocar en `/mcp` borra la fila: las peticiones con ese token pasan a responder 401 de inmediato.
 
 ## MCP Tools
 
@@ -151,6 +163,8 @@ model Task {
 }
 ```
 
+Además, `McpToken` guarda los accesos MCP (hash SHA-256 + prefijo visible, `expiresAt` y `lastUsedAt`), y las tablas de Better Auth (`User`, `Session`, `Account`, `Verification`).
+
 ## Scripts
 
 ```bash
@@ -181,17 +195,22 @@ npx playwright test
 
 ```text
 app/
-  page.tsx              # lista + filtros + form
-  actions.ts            # Server Actions
+  layout.tsx            # navbar compartida (sesión)
+  page.tsx              # landing pública
+  (protegido)/tareas/page.tsx  # lista + filtros + form
+  (protegido)/mcp/page.tsx     # tokens MCP
+  actions.ts            # Server Actions de tareas
+  mcp/actions.ts        # Server Actions de tokens MCP
   api/[transport]/route.ts  # servidor MCP
 components/
-  task-form.tsx task-item.tsx task-filters.tsx day-headline.tsx
+  site-header.tsx task-form.tsx task-item.tsx task-filters.tsx day-headline.tsx
+  landing/ mcp/         # landing y componentes de tokens
 lib/
-  tasks.ts validators.ts mcp.ts db.ts
+  tasks.ts mcp-tokens.ts mcp-auth.ts validators.ts mcp.ts db.ts
   generated/prisma/  # cliente Prisma 7 (generado, no commitear)
 prisma.config.ts  # datasource URL para el CLI (Prisma 7)
 prisma/schema.prisma
-e2e/todo.spec.ts
+e2e/todo.spec.ts e2e/todo-auth.spec.ts e2e/proteccion.spec.ts e2e/mcp-tokens.spec.ts
 openspec/ requirement.md AGENTS.md
 ```
 

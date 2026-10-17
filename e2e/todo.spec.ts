@@ -14,14 +14,15 @@ test("flujo completo: crear, filtrar, editar, completar y borrar", async ({ page
 
   await page.goto("/");
 
-  // El formulario solo existe con sesión (comportamiento esperado tras el fix
-  // de sesión): se registra un usuario único para este run y se continúa.
+  // La app vive en /tareas (protegida): se registra un usuario único desde la
+  // landing y el modal navega por defecto a la app.
   await page.getByTestId("auth-register-btn").click();
   await page.getByTestId("auth-email").fill(email);
   await page.getByTestId("auth-password").fill(password);
   await page.getByTestId("auth-register-submit").click();
-  await expect(page.getByTestId("auth-signout-btn")).toBeVisible({ timeout: 15000 });
-  await expect(page.getByTestId("new-title")).toBeVisible();
+  await expect(page).toHaveURL(/\/tareas$/, { timeout: 45000 });
+  await expect(page.getByTestId("auth-signout-btn")).toBeVisible({ timeout: 30000 });
+  await expect(page.getByTestId("new-title")).toBeVisible({ timeout: 30000 });
 
   await page.getByTestId("new-title").fill(title);
   await page.getByTestId("create-btn").click();
@@ -30,7 +31,7 @@ test("flujo completo: crear, filtrar, editar, completar y borrar", async ({ page
   await page.getByTestId("filter-PENDIENTE").click();
   await page.waitForURL("**estado=PENDIENTE**");
   await page.reload();
-  await expect(liBy(title)).toBeVisible();
+  await expect(liBy(title)).toBeVisible({ timeout: 30000 });
 
   // Scope estable por id (el texto deja de matchear hasText en modo edición)
   const taskTestId = await liBy(title).getAttribute("data-testid");
@@ -50,7 +51,7 @@ test("flujo completo: crear, filtrar, editar, completar y borrar", async ({ page
   await page.getByTestId("filter-COMPLETADA").click();
   await page.waitForURL("**estado=COMPLETADA**");
   await page.reload();
-  await expect(page.getByText(editedTitle).first()).toBeVisible();
+  await expect(page.getByText(editedTitle).first()).toBeVisible({ timeout: 30000 });
 
   const scope2TestId = await liBy(editedTitle).getAttribute("data-testid");
   await page.locator(`li[data-testid="${scope2TestId}"]`).getByTestId("delete-btn").click();

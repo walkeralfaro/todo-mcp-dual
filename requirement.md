@@ -31,6 +31,13 @@ La entidad principal del sistema es `Task` (Tarea), estructurada con los siguien
 - `fechaCreacion`: `DateTime` (Valor por defecto: `now()`)
 - `fechaCulminada`: `DateTime` (Opcional, se registra automáticamente al pasar a `COMPLETADA`)
 
+El esquema también incluye las entidades de autenticación de Better Auth (`User`, `Session`, `Account`, `Verification`) y `McpToken`, que representa un token de acceso al servidor MCP:
+
+- `token`: `String` único (hash SHA-256 del valor en claro; el valor en claro nunca se persiste)
+- `tokenPrefix`: `String?` (primeros 8 caracteres del token, para identificarlo en la UI)
+- `expiresAt`: `DateTime?` (por defecto, 90 días desde la creación)
+- `lastUsedAt`: `DateTime?` (último uso autenticado contra `/api/mcp`)
+
 ---
 
 ## 4. Requisitos Funcionales
@@ -45,6 +52,16 @@ La entidad principal del sistema es `Task` (Tarea), estructurada con los siguien
    - Validación estricta de los parámetros de entrada mediante esquemas **Zod** en cada herramienta MCP.
 3. **Consistencia de Estado:**
    - Cualquier mutación realizada por un agente de IA a través del servidor MCP debe reflejarse de forma inmediata en la base de datos y viceversa para el usuario web.
+4. **Rutas y protección:**
+   - Landing pública en `/` (presentación del producto y punto de acceso).
+   - La aplicación de tareas vive en `/tareas`: exige sesión y, sin ella, redirige a `/?auth=login&next=<ruta>` conservando la ruta pedida para volver tras autenticarse.
+   - Página de tokens MCP en `/mcp`, también protegida.
+   - Navbar compartida en todas las rutas con el estado de sesión (iniciar sesión, registrarse y cerrar sesión).
+5. **Tokens MCP:**
+   - Generación bajo demanda en `/mcp` (solo con sesión): valor en claro `tmcp_…` mostrado una única vez; se persisten el hash SHA-256 (`mcp_token.token`) y el prefijo visible (`tokenPrefix`).
+   - Expiración por defecto de 90 días y `lastUsedAt` actualizado en cada uso autenticado.
+   - Revocación inmediata (borrado de la fila) desde `/mcp`.
+   - Uso desde clientes MCP mediante la cabecera `Authorization: Bearer <token>` contra `/api/mcp`.
 
 ---
 

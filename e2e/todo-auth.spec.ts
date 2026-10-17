@@ -4,21 +4,18 @@ import { expect, test } from "@playwright/test";
 // tardar varios segundos en ráfagas de latencia.
 test.setTimeout(90000);
 
-test("flujo de autenticación: sin sesión no puede crear; con sesión puede crear, cerrar sesión y vuelve al estado anónimo" +
-  " sin recarga manual", async ({ page }) => {
+test("flujo de autenticación: registro desde la landing entra a /tareas, permite crear y el logout vuelve a la landing", async ({ page }) => {
   const email = `usuario${Date.now()}@prueba.test`;
   const password = "password123";
   const taskTitle = `Tarea E2E ${Date.now()}`;
 
   await page.goto("/");
 
-  // Sin sesión: no aparece el formulario de creación ni los botones de tarea
+  // Sin sesión: la landing es pública y no muestra el formulario de tareas
+  await expect(page.getByTestId("landing-login")).toBeVisible();
   await expect(page.getByTestId("new-title")).toBeHidden();
-  await expect(page.getByTestId("create-btn")).toBeHidden();
-  // El estado vacío invita a iniciar sesión (no a crear tareas)
-  await expect(page.getByText("Inicia sesión para crear tus tareas.")).toBeVisible();
 
-  // Abre el modal y se registra
+  // Registro: el modal navega a la app (destino por defecto sin `next`)
   await page.getByTestId("auth-register-btn").click();
   await expect(page.getByTestId("auth-register-submit")).toBeVisible();
 
@@ -26,25 +23,21 @@ test("flujo de autenticación: sin sesión no puede crear; con sesión puede cre
   await page.getByTestId("auth-password").fill(password);
   await page.getByTestId("auth-register-submit").click();
 
-  // El modal se cierra tras autenticarse con éxito sin recarga manual:
-  // el RSC refrescado muestra avatar/cerrar sesión y el formulario
-  // (timeouts holgados: el sign-up contra Turso puede tardar varios segundos)
-  await expect(page.getByTestId("auth-register-submit")).toBeHidden({ timeout: 15000 });
-  await expect(page.getByTestId("auth-signout-btn")).toBeVisible({ timeout: 15000 });
-  await expect(page.getByTestId("new-title")).toBeVisible({ timeout: 15000 });
-  await expect(page.getByTestId("create-btn")).toBeVisible({ timeout: 15000 });
+  // Vuelve a la app con la vista server-rendered ya autenticada
+  await expect(page).toHaveURL(/\/tareas$/, { timeout: 45000 });
+  await expect(page.getByTestId("auth-signout-btn")).toBeVisible({ timeout: 30000 });
+  await expect(page.getByTestId("new-title")).toBeVisible({ timeout: 30000 });
+  await expect(page.getByTestId("create-btn")).toBeVisible({ timeout: 30000 });
   // Crea una tarea
   await page.getByTestId("new-title").fill(taskTitle);
   await page.getByTestId("create-btn").click();
-  await expect(page.getByText(taskTitle)).toBeVisible({ timeout: 15000 });
+  await expect(page.getByText(taskTitle)).toBeVisible({ timeout: 30000 });
 
-  // Cierra sesión
+  // Cierra sesión: vuelve a la landing en estado anónimo
   await page.getByTestId("auth-signout-btn").click();
-  await expect(page.getByTestId("auth-signout-btn")).toBeHidden({ timeout: 15000 });
-
-  // Vuelve al estado anónimo sin recarga manual: sin formulario de creación
+  await expect(page).toHaveURL(/localhost:3000\/$/, { timeout: 45000 });
+  await expect(page.getByTestId("landing-login")).toBeVisible({ timeout: 30000 });
   await expect(page.getByTestId("new-title")).toBeHidden();
-  await expect(page.getByTestId("create-btn")).toBeHidden();
 });
 
 test("contraseña incorrecta muestra un único error en español con el modal abierto y conserva lo tecleado", async ({
@@ -55,15 +48,17 @@ test("contraseña incorrecta muestra un único error en español con el modal ab
 
   await page.goto("/");
 
-  // Prepara una cuenta real para probar el 401 del login
+  // Prepara una cuenta real para probar el 401 del login (registro desde la landing)
   await page.getByTestId("auth-register-btn").click();
   await page.getByTestId("auth-email").fill(email);
   await page.getByTestId("auth-password").fill(password);
   await page.getByTestId("auth-register-submit").click();
-  await expect(page.getByTestId("auth-signout-btn")).toBeVisible({ timeout: 15000 });
+  await expect(page).toHaveURL(/\/tareas$/, { timeout: 45000 });
+  await expect(page.getByTestId("auth-signout-btn")).toBeVisible({ timeout: 30000 });
 
+  // Logout: vuelve a la landing
   await page.getByTestId("auth-signout-btn").click();
-  await expect(page.getByTestId("auth-signout-btn")).toBeHidden({ timeout: 15000 });
+  await expect(page.getByTestId("landing-login")).toBeVisible({ timeout: 30000 });
 
   await page.getByTestId("auth-login-btn").click();
   await page.getByTestId("auth-email").fill(email);

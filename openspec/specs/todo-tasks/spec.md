@@ -167,11 +167,30 @@ La UI SHALL usar tema oscuro "turno de noche" (fondo noche profunda, superficies
 - **THEN** el ratio cumple AA (≥4.5:1) aunque el fondo de la card difiera del fondo de página
 
 ### Requirement: Flujos y selectores de test estables
-El rediseño SHALL conservar todos los flujos (crear, filtrar, buscar, editar, cambiar estado, eliminar con confirmación) y todos los `data-testid` existentes, de modo que el E2E actual pasa sin modificaciones.
+El sistema SHALL conservar todos los flujos (crear, filtrar, buscar, editar, cambiar estado, eliminar con confirmación) y todos los `data-testid` existentes de la UI de tareas, que pasa a vivir en la ruta protegida `/tareas`. Los specs E2E SHALL actualizarse para entrar por esa ruta tras iniciar sesión y la suite `npx playwright test` SHALL quedar en verde.
 
 #### Scenario: E2E sin cambios
-- **WHEN** se ejecuta `npx playwright test` con el spec `e2e/todo.spec.ts` actual
-- **THEN** el flujo completo (crear, filtrar, editar, completar, borrar) termina en verde
+- **WHEN** se ejecuta `npx playwright test` sobre los flujos de tareas
+- **THEN** el flujo completo (registro/login, crear, filtrar, buscar, editar, completar, borrar) termina en verde conservando sus `data-testid` sin cambios
+
+#### Scenario: E2E en verde con la nueva entrada
+- **WHEN** se ejecuta `npx playwright test` con los specs actualizados (`todo.spec.ts`, `todo-auth.spec.ts`)
+- **THEN** los flujos completos entran por `/tareas` tras iniciar sesión y terminan en verde conservando sus `data-testid`
+
+#### Scenario: Mismos selectores tras el cambio de ruta
+- **WHEN** el usuario autenticado opera la app en `/tareas`
+- **THEN** los controles conservan los `data-testid` existentes (`new-title`, `create-btn`, `filter-*`, `edit-btn`, `save-btn`, `delete-btn`, `status-select`, entre otros)
+
+### Requirement: La UI de tareas vive en /tareas
+La interfaz de gestión de tareas (titular del día, formulario de creación, filtros, listado y footer) SHALL servirse en la ruta `/tareas`, protegida por sesión, sin cambios de comportamiento ni de layout respecto a la implementación actual.
+
+#### Scenario: App completa en la ruta nueva
+- **WHEN** un usuario autenticado abre `/tareas`
+- **THEN** ve titular, formulario, filtros y listado operando igual que antes del cambio de ruta
+
+#### Scenario: La raíz no sirve la app
+- **WHEN** se solicita `/`
+- **THEN** el sistema sirve la landing pública y no la interfaz de tareas
 
 ### Requirement: Layout desktop a altura de viewport con tareas prioritarias
 El sistema SHALL presentar en desktop (≥1024px) la app a la altura del viewport (`100dvh`) con la lista de tareas como región principal con scroll propio, manteniendo visibles el titular, el formulario de creación y los filtros sin desplazar las tareas fuera de pantalla. Las tareas SHALL ubicarse en la zona de mayor jerarquía visual (columna principal o primera sección visible) y nunca debajo de un formulario de altura completa. En móvil (<1024px) el apilado vertical se conserva con formulario compacto. En ambos viewports el sistema SHALL evitar scroll horizontal, garantizar dianas táctiles ≥44px de alto en móvil y mantener espaciados y jerarquía validados con `playwright-cli` (snapshot + screenshot en 1440px y 390px) y revisión `web-design-guidelines`.

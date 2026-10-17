@@ -36,6 +36,12 @@ export const taskIdSchema = z
   .trim()
   .min(1, "El id es obligatorio");
 
+/** Entradas de tokens MCP: la revocación identifica el token por id. */
+export const mcpTokenIdSchema = z
+  .string()
+  .trim()
+  .min(1, "El id del token es obligatorio");
+
 export const listTasksSchema = z.object({
   estado: TaskStatusEnum.optional(),
   q: z.string().trim().max(200).optional(),

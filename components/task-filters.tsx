@@ -27,7 +27,7 @@ export function TaskFilters({ estado, q, total }: { estado: string; q: string; t
       const params = new URLSearchParams(sp.toString());
       if (qLocal) params.set("q", qLocal);
       else params.delete("q");
-      router.push(`/?${params.toString()}`);
+      router.push(`/tareas?${params.toString()}`);
     }, 300);
     return () => {
       if (timer.current) window.clearTimeout(timer.current);
@@ -39,7 +39,7 @@ export function TaskFilters({ estado, q, total }: { estado: string; q: string; t
     const params = new URLSearchParams(sp.toString());
     if (value === "TODAS") params.delete("estado");
     else params.set("estado", value);
-    router.push(`/?${params.toString()}`);
+    router.push(`/tareas?${params.toString()}`);
   }
 
   function clearSearch(): void {
@@ -47,7 +47,7 @@ export function TaskFilters({ estado, q, total }: { estado: string; q: string; t
     setQLocal("");
     const params = new URLSearchParams(sp.toString());
     params.delete("q");
-    router.push(`/?${params.toString()}`);
+    router.push(`/tareas?${params.toString()}`);
     searchRef.current?.focus();
   }
 

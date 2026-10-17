@@ -93,6 +93,7 @@ model Task {
 model McpToken {
   id          String   @id @default(cuid())
   token       String   @unique
+  tokenPrefix String?
   userId      String
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   scopes      String?

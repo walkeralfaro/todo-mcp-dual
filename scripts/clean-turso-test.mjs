@@ -20,9 +20,33 @@ if (!url.startsWith("libsql:")) {
 }
 
 const client = createClient({ url, authToken });
+
+/**
+ * Turso muestra ráfagas de latencia y el primer connect puede expirar
+ * (~10s) y fallar en falso; se reintenta porque este script bloquea el
+ * arranque del webServer de Playwright.
+ */
+async function withRetry(fn, attempts = 3) {
+  let lastError;
+  for (let i = 1; i <= attempts; i++) {
+    try {
+      return await fn();
+    } catch (error) {
+      lastError = error;
+      if (i < attempts) {
+        console.error(`Intento ${i}/${attempts} falló: ${error?.message ?? error}`);
+        await new Promise((resolve) => setTimeout(resolve, 1000 * i));
+      }
+    }
+  }
+  throw lastError;
+}
+
 try {
-  await client.execute("DELETE FROM Task");
-  const rs = await client.execute("SELECT count(*) AS n FROM Task");
+  await withRetry(() => client.execute("DELETE FROM Task"));
+  const rs = await withRetry(() =>
+    client.execute("SELECT count(*) AS n FROM Task"),
+  );
   console.log(`OK Task limpiada. count=${rs.rows[0].n}`);
 } finally {
   client.close();
