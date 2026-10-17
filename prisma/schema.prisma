@@ -13,6 +13,69 @@ enum TaskStatus {
   COMPLETADA
 }
 
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified Boolean   @default(false)
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  sessions      Session[]
+  accounts      Account[]
+  tasks         Task[]
+  mcpTokens     McpToken[]
+
+  @@map("user")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  expiresAt    DateTime
+  token        String   @unique
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  ipAddress    String?
+  userAgent    String?
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("session")
+}
+
+model Account {
+  id                   String      @id @default(cuid())
+  accountId            String
+  providerId           String
+  userId               String
+  user                 User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken          String?
+  refreshToken         String?
+  idToken              String?
+  accessTokenExpiresAt DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                String?
+  password             String?
+  createdAt            DateTime    @default(now())
+  updatedAt            DateTime    @updatedAt
+
+  @@index([userId])
+  @@map("account")
+}
+
+model Verification {
+  id         String   @id @default(cuid())
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+  @@map("verification")
+}
+
 model Task {
   id             String     @id @default(cuid())
   titulo         String
@@ -20,6 +83,23 @@ model Task {
   estado         TaskStatus @default(PENDIENTE)
   fechaCreacion  DateTime   @default(now())
   fechaCulminada DateTime?
+  userId         String
+  user           User       @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([estado, fechaCreacion])
+  @@index([userId])
+}
+
+model McpToken {
+  id          String   @id @default(cuid())
+  token       String   @unique
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  scopes      String?
+  expiresAt   DateTime?
+  lastUsedAt  DateTime?
+  createdAt   DateTime @default(now())
+
+  @@index([userId])
+  @@map("mcp_token")
 }

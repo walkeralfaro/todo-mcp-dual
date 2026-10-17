@@ -7,9 +7,10 @@ import {
   mcpListTasks,
   mcpUpdateTask,
 } from "@/lib/mcp";
+import { authenticateMcpBearer } from "@/lib/mcp-auth";
 import { TaskStatusEnum } from "@/lib/validators";
 
-const handler = createMcpHandler(
+const baseHandler = createMcpHandler(
   (server) => {
     server.registerTool(
       "list_tasks",
@@ -80,4 +81,64 @@ const handler = createMcpHandler(
   { serverInfo: { name: "todo-mcp", version: "0.1.0" }, verboseLogs: false },
 );
 
-export { handler as GET, handler as POST, handler as DELETE };
+/**
+ * Middleware de autenticación MCP (Opción B: Bearer token).
+ * Valida el token contra `McpToken` (hash SHA-256), resuelve `userId` y lo
+ * inyecta en `params` de cada request JSON-RPC para aislar por usuario.
+ */
+async function authenticatedHandler(request: Request): Promise<Response> {
+  const userId = await authenticateMcpBearer(request);
+  if (!userId) {
+    return new Response(
+      JSON.stringify({
+        jsonrpc: "2.0",
+        error: { code: -32001, message: "No autenticado: token MCP inválido o ausente" },
+      }),
+      { status: 401, headers: { "content-type": "application/json" } },
+    );
+  }
+
+  // Inyectar `userId` en los params de cada request JSON-RPC.
+  let modifiedRequest: Request = request;
+  const contentType = request.headers.get("content-type") ?? "";
+  if (contentType.includes("application/json")) {
+    try {
+      const body = (await request.clone().json()) as unknown;
+      const withUserId = injectUserId(body, userId);
+      if (withUserId !== body) {
+        modifiedRequest = new Request(request.url, {
+          method: request.method,
+          headers: { ...Object.fromEntries(request.headers.entries()), "content-type": "application/json" },
+          body: JSON.stringify(withUserId),
+        });
+      }
+    } catch {
+      // Si no es JSON válido, dejar pasar al handler base (que responderá error de parseo).
+    }
+  }
+
+  return baseHandler(modifiedRequest);
+}
+
+/**
+ * Inyecta `userId` en el campo `params` de un cuerpo JSON-RPC (simple o batch).
+ * Solo modifica si `params` es un objeto y aún no trae `userId`.
+ */
+function injectUserId(body: unknown, userId: string): unknown {
+  if (Array.isArray(body)) {
+    return body.map((item) => injectUserId(item, userId));
+  }
+  if (body && typeof body === "object" && !("params" in body)) {
+    return body;
+  }
+  const rpc = body as { params?: unknown; [key: string]: unknown };
+  if (rpc.params && typeof rpc.params === "object" && !Array.isArray(rpc.params)) {
+    const params = rpc.params as Record<string, unknown>;
+    if (!("userId" in params)) {
+      params.userId = userId;
+    }
+  }
+  return rpc;
+}
+
+export { authenticatedHandler as GET, authenticatedHandler as POST, authenticatedHandler as DELETE };

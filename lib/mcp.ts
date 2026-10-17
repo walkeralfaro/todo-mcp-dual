@@ -30,10 +30,18 @@ function mcpError(message: string): McpResult {
 const LIMIT_DEFAULT = 50;
 const LIMIT_MAX = 100;
 
+function requireUserId(params: unknown): string {
+  const p = (params as { userId?: string }) ?? {};
+  if (!p.userId) throw new Error("No autenticado");
+  return p.userId;
+}
+
 export async function mcpListTasks(params: unknown, client: DbClient = db) {
   try {
-    const input = listTasksSchema.parse(params ?? {});
-    const tasks = await listTasks(input, client);
+    const p = (params as Record<string, unknown>) ?? {};
+    const userId = requireUserId(p);
+    const input = listTasksSchema.parse(p);
+    const tasks = await listTasks({ ...input, userId }, client);
     return mcpText(tasks);
   } catch (e) {
     return mcpError(e instanceof Error ? e.message : "Error inesperado");
@@ -42,8 +50,9 @@ export async function mcpListTasks(params: unknown, client: DbClient = db) {
 
 export async function mcpGetTask(params: unknown, client: DbClient = db) {
   try {
-    const { id } = (params as { id?: unknown }) ?? {};
-    const task = await getTask(taskIdSchema.parse(id), client);
+    const p = (params as { id?: string; userId?: string }) ?? {};
+    const userId = requireUserId(p);
+    const task = await getTask(taskIdSchema.parse(p.id), userId, client);
     return mcpText(task);
   } catch (e) {
     return mcpError(e instanceof Error ? e.message : "Error inesperado");
@@ -52,7 +61,9 @@ export async function mcpGetTask(params: unknown, client: DbClient = db) {
 
 export async function mcpCreateTask(params: unknown, client: DbClient = db) {
   try {
-    const task = await createTask(createTaskSchema.parse(params), client);
+    const p = (params as Record<string, unknown>) ?? {};
+    const userId = requireUserId(p);
+    const task = await createTask({ ...createTaskSchema.parse(p), userId }, client);
     return mcpText(task);
   } catch (e) {
     return mcpError(e instanceof Error ? e.message : "Error inesperado");
@@ -61,8 +72,10 @@ export async function mcpCreateTask(params: unknown, client: DbClient = db) {
 
 export async function mcpUpdateTask(params: unknown, client: DbClient = db) {
   try {
-    const { id, ...rest } = (params as { id?: unknown }) ?? {};
-    const task = await updateTask(taskIdSchema.parse(id), updateTaskSchema.parse(rest), client);
+    const p = (params as { id?: string; userId?: string } & Record<string, unknown>) ?? {};
+    const userId = requireUserId(p);
+    const { id, ...rest } = p;
+    const task = await updateTask(taskIdSchema.parse(id), updateTaskSchema.parse(rest), userId, client);
     return mcpText(task);
   } catch (e) {
     return mcpError(e instanceof Error ? e.message : "Error inesperado");
@@ -71,8 +84,9 @@ export async function mcpUpdateTask(params: unknown, client: DbClient = db) {
 
 export async function mcpDeleteTask(params: unknown, client: DbClient = db) {
   try {
-    const { id } = (params as { id?: unknown }) ?? {};
-    const task = await deleteTask(taskIdSchema.parse(id), client);
+    const p = (params as { id?: string; userId?: string }) ?? {};
+    const userId = requireUserId(p);
+    const task = await deleteTask(taskIdSchema.parse(p.id), userId, client);
     return mcpText({ deleted: true, id: task.id });
   } catch (e) {
     return mcpError(e instanceof Error ? e.message : "Error inesperado");

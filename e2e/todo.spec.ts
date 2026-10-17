@@ -1,11 +1,27 @@
 import { expect, test } from "@playwright/test";
 
+// Turso (aws-us-east-1) muestra ráfagas de latencia (sign-up ~6s, sign-out
+// ~11s observados); el default de 30s por test se queda corto para un flujo
+// CRUD completo con recargas.
+test.setTimeout(90000);
+
 test("flujo completo: crear, filtrar, editar, completar y borrar", async ({ page }) => {
   const title = `E2E ${Date.now()}`;
   const editedTitle = `${title} editada`;
   const liBy = (text: string) => page.locator("li", { hasText: text }).first();
+  const email = `usuario${Date.now()}@prueba.test`;
+  const password = "password123";
 
   await page.goto("/");
+
+  // El formulario solo existe con sesión (comportamiento esperado tras el fix
+  // de sesión): se registra un usuario único para este run y se continúa.
+  await page.getByTestId("auth-register-btn").click();
+  await page.getByTestId("auth-email").fill(email);
+  await page.getByTestId("auth-password").fill(password);
+  await page.getByTestId("auth-register-submit").click();
+  await expect(page.getByTestId("auth-signout-btn")).toBeVisible({ timeout: 15000 });
+  await expect(page.getByTestId("new-title")).toBeVisible();
 
   await page.getByTestId("new-title").fill(title);
   await page.getByTestId("create-btn").click();

@@ -20,11 +20,12 @@ import {
  */
 
 export async function listTasks(
-  input: ListTasksInput = { limit: 50, offset: 0 },
+  input: ListTasksInput & { userId: string },
   client: DbClient = db,
 ): Promise<Task[]> {
+  const { userId } = input;
   const { estado, q, limit, offset } = listTasksSchema.parse(input);
-  const where: Prisma.TaskWhereInput = {};
+  const where: Prisma.TaskWhereInput = { userId };
   if (estado) where.estado = estado;
   if (q) {
     where.OR = [
@@ -40,15 +41,20 @@ export async function listTasks(
   });
 }
 
-export async function getTask(id: string, client: DbClient = db): Promise<Task> {
+export async function getTask(
+  id: string,
+  userId: string,
+  client: DbClient = db,
+): Promise<Task> {
   const parsedId = taskIdSchema.parse(id);
   const task = await client.task.findUnique({ where: { id: parsedId } });
   if (!task) throw new Error("La tarea no existe");
+  if (task.userId !== userId) throw new Error("No autorizada");
   return task;
 }
 
 export async function createTask(
-  input: CreateTaskInput,
+  input: CreateTaskInput & { userId: string },
   client: DbClient = db,
 ): Promise<Task> {
   const data = createTaskSchema.parse(input);
@@ -58,6 +64,7 @@ export async function createTask(
       titulo: data.titulo,
       descripcion: data.descripcion ?? null,
       estado,
+      userId: input.userId,
       fechaCulminada: estado === "COMPLETADA" ? new Date() : null,
     },
   });
@@ -66,6 +73,7 @@ export async function createTask(
 export async function updateTask(
   id: string,
   input: UpdateTaskInput,
+  userId: string,
   client: DbClient | PrismaClient = db,
 ): Promise<Task> {
   const parsedId = taskIdSchema.parse(id);
@@ -74,6 +82,7 @@ export async function updateTask(
     where: { id: parsedId },
   });
   if (!current) throw new Error("La tarea no existe");
+  if (current.userId !== userId) throw new Error("No autorizada");
 
   const nextEstado = data.titulo !== undefined || data.descripcion !== undefined || data.estado
     ? (data.estado ?? current.estado)
@@ -97,9 +106,14 @@ export async function updateTask(
   });
 }
 
-export async function deleteTask(id: string, client: DbClient = db): Promise<Task> {
+export async function deleteTask(
+  id: string,
+  userId: string,
+  client: DbClient = db,
+): Promise<Task> {
   const parsedId = taskIdSchema.parse(id);
   const current = await client.task.findUnique({ where: { id: parsedId } });
   if (!current) throw new Error("La tarea no existe");
+  if (current.userId !== userId) throw new Error("No autorizada");
   return client.task.delete({ where: { id: parsedId } });
 }

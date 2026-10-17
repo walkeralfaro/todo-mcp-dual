@@ -24,7 +24,25 @@ export function newTestClient(): PrismaClient {
   return new PrismaClient({ adapter });
 }
 
-/** Limpieza por tablas: deja la DB de test vacía sin recrearla. */
+/** Limpieza por tablas: deja la DB de test vacía sin recrearla.
+ *  Se borran las tablas hijas antes que `user` para respetar las claves foráneas. */
 export async function cleanTasks(client: PrismaClient): Promise<void> {
+  await client.mcpToken.deleteMany();
+  await client.session.deleteMany();
+  await client.account.deleteMany();
+  await client.verification.deleteMany();
   await client.task.deleteMany();
+  await client.user.deleteMany();
+}
+
+/** Crea un usuario de prueba y devuelve su id. Útil para tests de tareas aisladas por usuario. */
+export async function createTestUser(
+  client: PrismaClient,
+  email = "usuario@prueba.test",
+  name = "Usuario de Prueba",
+): Promise<string> {
+  const user = await client.user.create({
+    data: { email, name },
+  });
+  return user.id;
 }
