@@ -1,160 +1,82 @@
+import Link from "next/link";
 import { LandingCta } from "@/components/landing/landing-cta";
 
-/** Fragmento de la lista de tokens (flanco izquierdo del cierre). */
-function TokenListFragment(): React.JSX.Element {
-  const tokens = [
-    ["tmcp_ab12…", "Creado 12/10 · Expira 10/01"],
-    ["tmcp_7f3d…", "Creado 2/10 · Uso 15/10"],
-    ["tmcp_e091…", "Creado 28/9 · Expira 27/12"],
-  ];
-  return (
-    <div
-      data-ui
-      className="flex h-full flex-col gap-[0.3em] overflow-hidden rounded-lg bg-surface p-[0.4em]"
-      style={{ fontSize: 40 }}
-    >
-      {tokens.map(([prefijo, fechas]) => (
-        <div
-          key={prefijo}
-          className="ui-card flex flex-col gap-[0.15em] p-[0.3em] text-[0.34em]"
-        >
-          <span className="tabular-nums text-ink">{prefijo}</span>
-          <span className="text-muted">{fechas}</span>
-          <span className="ui-block self-start bg-ground text-destructive">
-            Revocar
-          </span>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-/** Cierre: fila de tres tiles (fragmento, tile de acción acento, campo liso). */
+/** Cierre de la landing con una sola acción y navegación secundaria. */
 export function LandingClose(): React.JSX.Element {
   return (
     <section
       aria-labelledby="cierre-title"
-      className="grid grid-cols-2 gap-2 md:grid-cols-12"
+      className="flex flex-col gap-6 rounded-2xl border border-ink/10 bg-surface p-6 sm:p-9 lg:flex-row lg:items-center lg:justify-between lg:gap-10"
     >
-      <div className="order-2 col-span-1 h-40 md:order-none md:col-span-2 md:h-[360px]">
-        <TokenListFragment />
-      </div>
-
-      <div className="order-1 col-span-2 flex flex-col items-start justify-center gap-4 rounded-lg bg-accent p-8 text-[#06130c] md:order-none md:col-span-8 md:min-h-[360px] md:p-10">
+      <div className="max-w-[620px]">
+        <p className="text-[13px] font-semibold uppercase tracking-[0.14em] text-accent">
+          Empieza con una lista
+        </p>
         <h2
           id="cierre-title"
-          className="text-[clamp(2rem,4.4vw,4.25rem)] font-semibold leading-[1.02] tracking-[-0.03em]"
+          className="mt-3 text-[clamp(2rem,6vw,3.25rem)] font-semibold leading-[1.02] tracking-[-0.045em]"
         >
-          Todo empieza en una lista
+          Tus tareas, siempre a mano
         </h2>
-        <p className="max-w-[46ch] text-[16px] leading-[1.5]">
-          Tu cuenta, tu token y tu cliente MCP en unos minutos.
+        <p className="mt-4 max-w-[52ch] text-[16px] leading-[1.6] text-muted">
+          Organízalas desde la web y conecta tu cliente MCP cuando quieras
+          trabajar con un agente.
         </p>
-        <p className="max-w-[46ch] text-[16px] leading-[1.5] text-[#06130c]/80">
-          Después: crear, filtrar, completar y borrar desde el agente.
-        </p>
-        <div className="mt-2">
-          <LandingCta variant="close" testIdPrefix="landing-close" />
-        </div>
       </div>
-
-      <div
-        aria-hidden
-        className="order-2 col-span-1 h-40 rounded-lg bg-ink md:order-none md:col-span-2 md:h-[360px]"
-      />
+      <div className="shrink-0">
+        <LandingCta variant="close" testIdPrefix="landing-close" />
+      </div>
     </section>
   );
 }
 
-const BLOQUES: Array<{ ch: string; tono: string; altura: number }> = [
-  { ch: "T", tono: "bg-elevated text-ink", altura: 1 },
-  { ch: "O", tono: "bg-ink text-ground", altura: 0.82 },
-  { ch: "D", tono: "bg-elevated text-ink", altura: 0.94 },
-  { ch: "O", tono: "bg-accent text-[#06130c]", altura: 0.72 },
-  { ch: "A", tono: "bg-ink text-ground", altura: 0.88 },
-  { ch: "P", tono: "bg-elevated text-ink", altura: 0.68 },
-  { ch: "P", tono: "bg-ink text-ground", altura: 0.84 },
-];
-
 const ENLACES_PAGINA = [
-  ["La lista", "#lista"],
-  ["Tus agentes", "#agentes"],
-  ["Herramientas", "#herramientas"],
-  ["La letra pequeña", "#cuidado"],
+  ["La demo", "#lista"],
+  ["Conectar un agente", "#agentes"],
+  ["Herramientas MCP", "#herramientas"],
 ] as const;
 
-/** footer — «the mark, built large»: la marca en bloques y las rutas reales. */
+/** Enlaces breves al contenido y las rutas reales del producto. */
 export function LandingFooter(): React.JSX.Element {
   return (
-    <footer className="rounded-lg bg-surface px-5 py-8 sm:px-8 sm:py-10">
-      <div
-        aria-hidden
-        className="flex h-[22svh] max-h-[320px] min-h-[160px] items-end gap-1 md:h-[34svh] md:max-h-[360px]"
+    <footer className="border-t border-ink/10 pb-2 pt-7">
+      <nav
+        aria-label="Mapa del sitio"
+        className="flex flex-col justify-between gap-6 sm:flex-row sm:items-center"
       >
-        {BLOQUES.map((bloque, i) => (
-          <div
-            key={`${bloque.ch}-${i}`}
-            style={{ height: `${bloque.altura * 100}%` }}
-            className={`flex flex-1 items-center justify-center rounded-sm ${bloque.tono}`}
-          >
-            <span className="text-[clamp(3.5rem,12vw,10rem)] font-semibold leading-none tracking-[-0.03em]">
-              {bloque.ch}
-            </span>
-          </div>
-        ))}
-      </div>
-
-      <nav aria-label="Mapa del sitio" className="mt-12 grid grid-cols-2 gap-8 md:mt-14 md:grid-cols-12">
-        <div className="md:col-span-3">
-          <p className="text-[15px] font-medium text-ink">La página</p>
-          <ul className="mt-3 flex flex-col gap-2">
-            {ENLACES_PAGINA.map(([label, href]) => (
-              <li key={href}>
-                <a
-                  href={href}
-                  className="inline-flex h-9 items-center text-[15px] text-muted hover:text-ink"
-                >
-                  {label}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </div>
-        <div className="md:col-span-3">
-          <p className="text-[15px] font-medium text-ink">Producto</p>
-          <ul className="mt-3 flex flex-col gap-2">
-            <li>
+        <Link href="/" className="text-[15px] font-semibold text-ink">
+          Todo App
+        </Link>
+        <ul className="flex flex-wrap gap-x-5 gap-y-1">
+          {ENLACES_PAGINA.map(([label, href]) => (
+            <li key={href}>
               <a
-                href="/tareas"
-                className="inline-flex h-9 items-center text-[15px] text-muted hover:text-ink"
+                href={href}
+                className="inline-flex min-h-11 items-center text-[14px] text-muted transition-colors hover:text-ink"
               >
-                Mis tareas
+                {label}
               </a>
             </li>
-            <li>
-              <a
-                href="/mcp"
-                className="inline-flex h-9 items-center text-[15px] text-muted hover:text-ink"
-              >
-                Tokens MCP
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div className="col-span-2 flex flex-col gap-2 md:col-span-6">
-          <p className="text-[15px] leading-[1.5] text-muted">
-            Servidor MCP · /api/mcp (HTTP y Authorization: Bearer)
-          </p>
-          <p className="text-[15px] leading-[1.5] text-muted">
-            Interfaz, servidor y datos en el mismo proyecto.
-          </p>
-        </div>
+          ))}
+          <li>
+            <Link
+              href="/tareas"
+              className="inline-flex min-h-11 items-center text-[14px] text-muted transition-colors hover:text-ink"
+            >
+              Mis tareas
+            </Link>
+          </li>
+          <li>
+            <Link
+              href="/mcp"
+              className="inline-flex min-h-11 items-center text-[14px] text-muted transition-colors hover:text-ink"
+            >
+              Tokens MCP
+            </Link>
+          </li>
+        </ul>
       </nav>
-
-      <div className="mt-10 flex flex-wrap items-center justify-between gap-4">
-        <p className="text-[13px] text-muted">© 2026 Todo App</p>
-        <LandingCta variant="footer" testIdPrefix="landing-footer" />
-      </div>
+      <p className="mt-4 text-[12px] text-muted">© 2026 Todo App</p>
     </footer>
   );
 }

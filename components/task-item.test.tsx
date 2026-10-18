@@ -9,8 +9,10 @@ vi.mock("next/navigation", () => ({
 }));
 
 const { deleteTaskActionMock, updateTaskActionMock } = vi.hoisted(() => ({
-  deleteTaskActionMock: vi.fn(async (_id: string) => ({ ok: true })),
-  updateTaskActionMock: vi.fn(async (_id: string, _fd: FormData) => ({ ok: true })),
+  deleteTaskActionMock: vi.fn<(id: string) => Promise<{ ok: boolean }>>(async () => ({ ok: true })),
+  updateTaskActionMock: vi.fn<(id: string, fd: FormData) => Promise<{ ok: boolean }>>(
+    async () => ({ ok: true }),
+  ),
 }));
 
 vi.mock("@/app/actions", () => ({
@@ -95,7 +97,7 @@ describe("TaskItem acciones Button shadcn", () => {
     await waitFor(() => {
       expect(updateTaskActionMock).toHaveBeenCalled();
     });
-    const fd = updateTaskActionMock.mock.calls[0][1] as FormData;
+    const fd = updateTaskActionMock.mock.calls[0][1];
     expect(fd.get("titulo")).toBe("Nuevo titulo");
   });
 });

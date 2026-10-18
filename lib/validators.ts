@@ -1,6 +1,8 @@
 import { z } from "zod";
 
-export const TaskStatusEnum = z.enum(["PENDIENTE", "EN_PROCESO", "COMPLETADA"]);
+export const TaskStatusEnum = z.enum(["PENDIENTE", "EN_PROCESO", "COMPLETADA"], {
+  error: "Estado no válido: usa PENDIENTE, EN_PROCESO o COMPLETADA",
+});
 export type TaskStatus = z.infer<typeof TaskStatusEnum>;
 
 export const tituloSchema = z
@@ -44,9 +46,18 @@ export const mcpTokenIdSchema = z
 
 export const listTasksSchema = z.object({
   estado: TaskStatusEnum.optional(),
-  q: z.string().trim().max(200).optional(),
-  limit: z.coerce.number().int().min(1).max(100).default(50),
-  offset: z.coerce.number().int().min(0).default(0),
+  q: z.string().trim().max(200, "Máximo 200 caracteres").optional(),
+  limit: z.coerce
+    .number()
+    .int("Debe ser un número entero")
+    .min(1, "El límite mínimo es 1")
+    .max(100, "Máximo 100")
+    .default(50),
+  offset: z.coerce
+    .number()
+    .int("Debe ser un número entero")
+    .min(0, "El desplazamiento no puede ser negativo")
+    .default(0),
 });
 
 export type ListTasksInput = z.infer<typeof listTasksSchema>;

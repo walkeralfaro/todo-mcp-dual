@@ -4,18 +4,25 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
+/** Sesión mínima que consumen las Server Actions (`session?.user?.id`). */
+type SessionLike = { user: { id: string } } | null;
+
+// Mock hoisted: la misma instancia que ve el módulo de auth y el test.
+const { getSession } = vi.hoisted(() => ({
+  getSession: vi.fn<() => Promise<{ user: { id: string } } | null>>(),
+}));
+
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
 vi.mock("next/headers", () => ({
   headers: vi.fn().mockResolvedValue(new Headers()),
 }));
 vi.mock("@/lib/auth", () => ({
   auth: {
-    api: { getSession: vi.fn() },
+    api: { getSession },
   },
 }));
 
 let actions: typeof import("./actions");
-let getSession: ReturnType<typeof vi.fn>;
 let realUserId: string;
 
 beforeAll(async () => {
@@ -25,8 +32,6 @@ beforeAll(async () => {
   delete process.env.TURSO_AUTH_TOKEN;
   execSync("npx prisma db push", { env: process.env, stdio: "pipe" });
   actions = await import("./actions");
-  const { auth } = await import("@/lib/auth");
-  getSession = auth.api.getSession as any;
   const { db } = await import("@/lib/db");
   const user = await db.user.upsert({
     where: { email: "mcp-usuario-prueba@test.test" },
@@ -38,7 +43,7 @@ beforeAll(async () => {
 
 beforeEach(async () => {
   // Sesión de usuario autenticado por defecto y aislamiento entre tests.
-  getSession.mockResolvedValue({ user: { id: realUserId } } as any);
+  getSession.mockResolvedValue({ user: { id: realUserId } } satisfies SessionLike);
   const { db } = await import("@/lib/db");
   await db.mcpToken.deleteMany();
 });

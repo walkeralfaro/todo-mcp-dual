@@ -1,4 +1,13 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Locator } from "@playwright/test";
+
+async function expectMinHitArea(locator: Locator): Promise<void> {
+  const bounds = await locator.evaluate((element) => {
+    const rect = element.getBoundingClientRect();
+    return { width: rect.width, height: rect.height };
+  });
+  expect(bounds.width).toBeGreaterThanOrEqual(44);
+  expect(bounds.height).toBeGreaterThanOrEqual(44);
+}
 
 // Mismo margen que todo.spec.ts: los sign-up/sign-out contra Turso pueden
 // tardar varios segundos en ráfagas de latencia.
@@ -9,11 +18,17 @@ test("flujo de autenticación: registro desde la landing entra a /tareas, permit
   const password = "password123";
   const taskTitle = `Tarea E2E ${Date.now()}`;
 
+  await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/");
 
   // Sin sesión: la landing es pública y no muestra el formulario de tareas
   await expect(page.getByTestId("landing-login")).toBeVisible();
   await expect(page.getByTestId("new-title")).toBeHidden();
+  const header = page.getByTestId("site-header");
+  await expectMinHitArea(header.getByRole("link", { name: "Todo App" }));
+  await expectMinHitArea(page.getByTestId("auth-login-btn"));
+  await expectMinHitArea(page.getByTestId("auth-register-btn"));
+  await page.setViewportSize({ width: 1280, height: 900 });
 
   // Registro: el modal navega a la app (destino por defecto sin `next`)
   await page.getByTestId("auth-register-btn").click();
@@ -28,10 +43,16 @@ test("flujo de autenticación: registro desde la landing entra a /tareas, permit
   await expect(page.getByTestId("auth-signout-btn")).toBeVisible({ timeout: 30000 });
   await expect(page.getByTestId("new-title")).toBeVisible({ timeout: 30000 });
   await expect(page.getByTestId("create-btn")).toBeVisible({ timeout: 30000 });
+  await expectMinHitArea(page.getByTestId("nav-tareas"));
+  await expectMinHitArea(page.getByTestId("nav-mcp"));
+  await expectMinHitArea(page.getByTestId("auth-signout-btn"));
   // Crea una tarea
   await page.getByTestId("new-title").fill(taskTitle);
   await page.getByTestId("create-btn").click();
   await expect(page.getByText(taskTitle)).toBeVisible({ timeout: 30000 });
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expectMinHitArea(page.getByTestId("auth-signout-btn"));
 
   // Cierra sesión: vuelve a la landing en estado anónimo
   await page.getByTestId("auth-signout-btn").click();

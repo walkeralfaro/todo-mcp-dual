@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { listTasks } from "@/lib/tasks";
+import { listTasks, countPendingTasks } from "@/lib/tasks";
 import { auth } from "@/lib/auth";
 import { DayHeadline } from "@/components/day-headline";
 import { TaskFilters } from "@/components/task-filters";
@@ -28,15 +28,18 @@ export default async function Tareas({
   const userId = session?.user?.id;
   if (!userId) redirect("/?auth=login&next=%2Ftareas");
 
-  const tasks = await listTasks({
-    userId,
-    estado: estado === "TODAS" ? undefined : estado,
-    q,
-    limit: 50,
-    offset: 0,
-  });
-
-  const pendientes = tasks.filter((t) => t.estado !== "COMPLETADA").length;
+  // El titular cuenta todos los pendientes del usuario, no el subconjunto
+  // filtrado ni las primeras 50 filas del listado.
+  const [tasks, pendientes] = await Promise.all([
+    listTasks({
+      userId,
+      estado: estado === "TODAS" ? undefined : estado,
+      q,
+      limit: 50,
+      offset: 0,
+    }),
+    countPendingTasks(userId),
+  ]);
 
   return (
     <div className="mx-auto flex w-full max-w-[1024px] flex-1 flex-col gap-8 px-5 py-8 lg:grid lg:min-h-0 lg:grid-cols-[minmax(0,1fr)_340px] lg:grid-rows-[auto_auto_minmax(0,1fr)_auto] lg:gap-x-10 lg:gap-y-6 lg:overflow-hidden lg:py-10">

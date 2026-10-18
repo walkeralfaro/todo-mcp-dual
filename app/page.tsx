@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { safeNextPath } from "@/lib/auth-redirect";
 import { LandingHero } from "@/components/landing/landing-hero";
 import { DemoBoard } from "@/components/landing/demo-board";
-import { Mosaic, Stages, Tools } from "@/components/landing/landing-sections";
+import { McpSetup, Tools } from "@/components/landing/landing-sections";
 import { LandingClose, LandingFooter } from "@/components/landing/landing-close";
 
 export const metadata: Metadata = {
@@ -12,8 +12,7 @@ export const metadata: Metadata = {
 };
 
 /**
- * Landing pública: el tablero real del producto como página (dirección
- * `dense-tiles`) con demo local sin persistencia y configuración MCP
+ * Landing pública con demo local sin persistencia y configuración MCP
  * copiable. Aquí viven el contrato de la ruta y el acceso dirigido
  * (`?auth=login|register` y `?next=...`), sin datos de ningún usuario.
  */
@@ -28,11 +27,10 @@ export default async function Landing({
   const next = safeNextPath(sp.next);
 
   return (
-    <div className="flex flex-col gap-2 px-3 py-3">
+    <div className="mx-auto flex w-full max-w-[1120px] flex-col gap-20 px-5 pb-10 sm:gap-28 sm:px-8 sm:pb-14">
       <LandingHero initialTab={initialTab} next={next} />
       <DemoBoard />
-      <Mosaic />
-      <Stages />
+      <McpSetup />
       <Tools />
       <LandingClose />
       <LandingFooter />

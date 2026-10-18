@@ -21,7 +21,7 @@ const albertSans = Albert_Sans({
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="es" suppressHydrationWarning>
+    <html lang="es" suppressHydrationWarning data-scroll-behavior="smooth">
       <body className={`${albertSans.variable} min-h-dvh bg-ground font-text text-ink antialiased`}>
         {/* La entrada escalonada oculta el contenido solo si el módulo de
             motion llega a hidratar; si no, se retira el flag a los 1,2 s y

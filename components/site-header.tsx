@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { authClient } from "@/lib/auth-client";
 import { AuthModal, type AuthTab } from "@/components/ui-auth/auth-modal";
@@ -22,12 +23,43 @@ export function SiteHeader(): React.JSX.Element {
   const [modalTab, setModalTab] = useState<AuthTab>("login");
   const [signingOut, setSigningOut] = useState(false);
   const [signOutError, setSignOutError] = useState<string | null>(null);
+  // Navegación de sesión en móvil (<640px), donde los enlaces no caben
+  // visibles junto al avatar y "Cerrar sesión".
+  const [navOpen, setNavOpen] = useState(false);
+  const navToggleWrapperRef = useRef<HTMLDivElement>(null);
+  const headerRef = useRef<HTMLElement>(null);
 
   const user = session?.user;
+
+  // El panel móvil se cierra con Escape (devolviendo el foco al botón que lo
+  // abrió) o al pulsar fuera del header. Escape se escucha en `document`
+  // porque el foco puede salir del header con el panel aún abierto.
+  useEffect(() => {
+    if (!navOpen) return;
+    const focusToggle = () => {
+      navToggleWrapperRef.current?.querySelector<HTMLButtonElement>("button")?.focus();
+    };
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      setNavOpen(false);
+      focusToggle();
+    };
+    const onPointerDown = (event: PointerEvent) => {
+      if (headerRef.current?.contains(event.target as Node)) return;
+      setNavOpen(false);
+    };
+    document.addEventListener("keydown", onKeyDown);
+    document.addEventListener("pointerdown", onPointerDown);
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+      document.removeEventListener("pointerdown", onPointerDown);
+    };
+  }, [navOpen]);
 
   const openModal = (tab: AuthTab) => {
     setModalTab(tab);
     setModalOpen(true);
+    setNavOpen(false);
   };
 
   const handleSignOut = async () => {
@@ -41,6 +73,7 @@ export function SiteHeader(): React.JSX.Element {
         return;
       }
       setModalOpen(false);
+      setNavOpen(false);
       // Vuelve a la landing: las rutas protegidas redirigen igualmente sin
       // sesión. Si ya estamos en "/", basta refrescar (push + refresh
       // seguidos pueden abortar la navegación).
@@ -68,7 +101,15 @@ export function SiteHeader(): React.JSX.Element {
 
   const linkClass = (href: string) =>
     cn(
-      "inline-flex h-9 items-center rounded-md px-3 text-[15px] transition-colors duration-150",
+      "inline-flex h-11 min-w-11 items-center justify-center rounded-md px-3 text-[15px] transition-colors duration-150",
+      pathname === href
+        ? "bg-elevated text-ink"
+        : "text-muted hover:bg-elevated hover:text-ink",
+    );
+
+  const panelLinkClass = (href: string) =>
+    cn(
+      "inline-flex min-h-11 w-full items-center rounded-md px-3 text-[15px] transition-colors duration-150",
       pathname === href
         ? "bg-elevated text-ink"
         : "text-muted hover:bg-elevated hover:text-ink",
@@ -76,13 +117,14 @@ export function SiteHeader(): React.JSX.Element {
 
   return (
     <header
+      ref={headerRef}
       data-testid="site-header"
       className="sticky top-0 z-40 bg-ground"
     >
       <div className="mx-auto flex h-14 w-full max-w-[1024px] items-center justify-between gap-4 px-5">
         <Link
           href="/"
-          className="font-display text-[17px] font-semibold tracking-[-0.01em] text-ink"
+          className="inline-flex min-h-11 items-center font-display text-[17px] font-semibold tracking-[-0.01em] text-ink"
         >
           Todo App
         </Link>
@@ -114,6 +156,24 @@ export function SiteHeader(): React.JSX.Element {
             )}
           </nav>
 
+          {user && (
+            <div ref={navToggleWrapperRef} className="sm:hidden">
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                data-testid="nav-menu-btn"
+                aria-label={navOpen ? "Cerrar navegación" : "Abrir navegación"}
+                aria-expanded={navOpen}
+                aria-controls="mobile-nav"
+                className="size-11"
+                onClick={() => setNavOpen((open) => !open)}
+              >
+                {navOpen ? <X aria-hidden="true" /> : <Menu aria-hidden="true" />}
+              </Button>
+            </div>
+          )}
+
           {user ? (
             <div className="flex items-center gap-2">
               <div className="flex items-center gap-2">
@@ -123,7 +183,9 @@ export function SiteHeader(): React.JSX.Element {
                 >
                   {imageSrc ? (
                     // Avatar externo de OAuth: <img> es suficiente y evita
-                    // configurar dominios remotos en next/image.
+                    // configurar dominios remotos en next/image (excepción
+                    // aceptada en la auditoría de calidad).
+                    // eslint-disable-next-line @next/next/no-img-element
                     <img
                       src={imageSrc}
                       alt={`Avatar de ${user.name ?? "usuario"}`}
@@ -149,7 +211,7 @@ export function SiteHeader(): React.JSX.Element {
                 data-testid="auth-signout-btn"
                 variant="ghost"
                 size="sm"
-                className="text-[13px] text-destructive hover:bg-destructive/10"
+                className="h-11 min-w-11 px-3 text-[13px] text-destructive hover:bg-destructive/10"
                 disabled={signingOut}
                 aria-busy={signingOut}
                 onClick={handleSignOut}
@@ -163,6 +225,7 @@ export function SiteHeader(): React.JSX.Element {
                 data-testid="auth-login-btn"
                 variant="outline"
                 size="sm"
+                className="h-11 min-w-11 px-3"
                 onClick={() => openModal("login")}
               >
                 Iniciar sesión
@@ -170,6 +233,7 @@ export function SiteHeader(): React.JSX.Element {
               <Button
                 data-testid="auth-register-btn"
                 size="sm"
+                className="h-11 min-w-11 px-3"
                 onClick={() => openModal("register")}
               >
                 Registrarse
@@ -178,6 +242,34 @@ export function SiteHeader(): React.JSX.Element {
           )}
         </div>
       </div>
+
+      {user && (
+        <nav
+          id="mobile-nav"
+          aria-label="Navegación de sesión"
+          className={cn(
+            "absolute inset-x-0 top-full z-50 border-t border-ink/10 bg-ground px-5 pb-4 pt-3 sm:hidden",
+            navOpen ? "flex flex-col gap-1" : "hidden",
+          )}
+        >
+          <Link
+            href="/tareas"
+            aria-current={pathname === "/tareas" ? "page" : undefined}
+            className={panelLinkClass("/tareas")}
+            onClick={() => setNavOpen(false)}
+          >
+            Mis tareas
+          </Link>
+          <Link
+            href="/mcp"
+            aria-current={pathname === "/mcp" ? "page" : undefined}
+            className={panelLinkClass("/mcp")}
+            onClick={() => setNavOpen(false)}
+          >
+            Tokens MCP
+          </Link>
+        </nav>
+      )}
 
       <AuthModal
         open={modalOpen}

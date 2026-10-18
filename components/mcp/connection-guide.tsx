@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { CopyButton } from "@/components/mcp/copy-button";
+import { useOrigin } from "@/lib/use-origin";
 
 /**
  * Instrucciones copiables para conectar un cliente MCP por HTTP con la
@@ -9,11 +9,7 @@ import { CopyButton } from "@/components/mcp/copy-button";
  * configuración copiada apunte al despliegue en uso.
  */
 export function ConnectionGuide(): React.JSX.Element {
-  const [origin, setOrigin] = useState("");
-
-  useEffect(() => {
-    setOrigin(window.location.origin);
-  }, []);
+  const origin = useOrigin();
 
   const endpoint = `${origin}/api/mcp`;
   const config = JSON.stringify(

@@ -9,6 +9,8 @@
   --color-muted: #9aa3c0;
   --color-accent: #2dffa8;
   --color-destructive: #ff7a7a;
+  /* Texto e iconos sobre `--color-accent` (y fondo de selección). */
+  --color-on-accent: #06130c;
 
   --font-display: "Albert Sans", system-ui, sans-serif;
   --font-text: "Albert Sans", system-ui, sans-serif;
@@ -34,7 +36,7 @@ html {
 
 ::selection {
   background-color: var(--color-accent);
-  color: #06130c;
+  color: var(--color-on-accent);
 }
 
 @keyframes headline-pulse {
@@ -53,45 +55,7 @@ html {
   animation: headline-pulse 250ms var(--ease-out-modal);
 }
 
-/* --- Landing: fragmentos reales de la interfaz (data-ui) ---
-   Un fragmento conserva sus convenciones de producto (bordes finos,
-   controles, radios pequeños); la página que lo rodea sigue las reglas
-   generales. El CSS de fragmentos vive bajo el selector [data-ui]. */
-[data-ui] {
-  --ui-line: color-mix(in srgb, var(--color-ink) 14%, transparent);
-}
-[data-ui] .ui-card {
-  background-color: var(--color-elevated);
-  border: 1px solid var(--ui-line);
-  border-radius: 0.375rem;
-}
-[data-ui] .ui-control {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75em;
-  height: 2.75em;
-  padding-inline: 0.875em;
-  background-color: var(--color-ground);
-  border: 1px solid var(--ui-line);
-  border-radius: 0.375rem;
-}
-[data-ui] .ui-chip {
-  display: inline-flex;
-  align-items: center;
-  height: 2em;
-  padding-inline: 0.75em;
-  border-radius: 0.375rem;
-  background-color: var(--color-elevated);
-  color: var(--color-ink);
-  white-space: nowrap;
-}
-[data-ui] .ui-dialog {
-  background-color: var(--color-elevated);
-  border: 1px solid var(--ui-line);
-  border-radius: 0.5rem;
-  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.45);
-}
+/* --- Landing: bloques de código, estado y disclosure (`data-ui`). --- */
 [data-ui] .ui-code {
   display: block;
   overflow-x: auto;
@@ -99,7 +63,6 @@ html {
   border-radius: 0.375rem;
   background-color: var(--color-ground);
   color: var(--color-ink);
-  font-size: 0.9em;
   line-height: 1.7;
 }
 [data-ui] .ui-block {
@@ -228,18 +191,14 @@ html[data-motion] [data-reveal].is-in {
   animation: shutter-settle 400ms 220ms var(--ease-out-modal) backwards;
 }
 
-/* Palabra gigante de la sección de herramientas: llena su columna. */
-.tools-column {
-  container-type: inline-size;
-}
-
 @media (prefers-reduced-motion: no-preference) {
   html {
     scroll-behavior: smooth;
   }
 }
 
-@media (prefers-reduced-motion: reduce) {  *,
+@media (prefers-reduced-motion: reduce) {
+  *,
   *::before,
   *::after {
     animation-duration: 0.01ms !important;

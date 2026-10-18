@@ -1,5 +1,6 @@
-import type { Prisma, PrismaClient, Task } from "./generated/prisma/client";
+import type { Prisma, Task } from "./generated/prisma/client";
 import { db, type DbClient } from "./db";
+import { DomainError } from "./errors";
 import {
   createTaskSchema,
   listTasksSchema,
@@ -41,6 +42,20 @@ export async function listTasks(
   });
 }
 
+/**
+ * Cuenta las tareas no completadas del usuario (cifra del titular del día).
+ * No depende del filtro ni de la ventana del listado: siempre cuenta todas
+ * las tareas del usuario cuyo estado no es COMPLETADA.
+ */
+export async function countPendingTasks(
+  userId: string,
+  client: DbClient = db,
+): Promise<number> {
+  return client.task.count({
+    where: { userId, estado: { not: "COMPLETADA" } },
+  });
+}
+
 export async function getTask(
   id: string,
   userId: string,
@@ -48,8 +63,8 @@ export async function getTask(
 ): Promise<Task> {
   const parsedId = taskIdSchema.parse(id);
   const task = await client.task.findUnique({ where: { id: parsedId } });
-  if (!task) throw new Error("La tarea no existe");
-  if (task.userId !== userId) throw new Error("No autorizada");
+  if (!task) throw new DomainError("La tarea no existe");
+  if (task.userId !== userId) throw new DomainError("No autorizada");
   return task;
 }
 
@@ -74,34 +89,27 @@ export async function updateTask(
   id: string,
   input: UpdateTaskInput,
   userId: string,
-  client: DbClient | PrismaClient = db,
+  client: DbClient = db,
 ): Promise<Task> {
   const parsedId = taskIdSchema.parse(id);
   const data = updateTaskSchema.parse(input);
-  const current = await (client as DbClient).task.findUnique({
-    where: { id: parsedId },
-  });
-  if (!current) throw new Error("La tarea no existe");
-  if (current.userId !== userId) throw new Error("No autorizada");
+  const current = await client.task.findUnique({ where: { id: parsedId } });
+  if (!current) throw new DomainError("La tarea no existe");
+  if (current.userId !== userId) throw new DomainError("No autorizada");
 
-  const nextEstado = data.titulo !== undefined || data.descripcion !== undefined || data.estado
-    ? (data.estado ?? current.estado)
-    : current.estado;
-
+  // `fechaCulminada` solo cambia al cambiar de estado: se asigna al completar
+  // y se limpia al salir de COMPLETADA.
   let fechaCulminada = current.fechaCulminada;
   if (data.estado) {
-    if (data.estado === "COMPLETADA") fechaCulminada = new Date();
-    else fechaCulminada = null;
+    fechaCulminada = data.estado === "COMPLETADA" ? new Date() : null;
   }
 
-  return (client as DbClient).task.update({
+  return client.task.update({
     where: { id: parsedId },
     data: {
       ...(data.titulo !== undefined ? { titulo: data.titulo } : {}),
       ...(data.descripcion !== undefined ? { descripcion: data.descripcion } : {}),
-      ...(data.estado ? { estado: data.estado } : {}),
-      ...(data.estado ? { fechaCulminada } : {}),
-      ...(nextEstado === current.estado && !data.estado ? {} : {}),
+      ...(data.estado ? { estado: data.estado, fechaCulminada } : {}),
     },
   });
 }
@@ -113,7 +121,7 @@ export async function deleteTask(
 ): Promise<Task> {
   const parsedId = taskIdSchema.parse(id);
   const current = await client.task.findUnique({ where: { id: parsedId } });
-  if (!current) throw new Error("La tarea no existe");
-  if (current.userId !== userId) throw new Error("No autorizada");
+  if (!current) throw new DomainError("La tarea no existe");
+  if (current.userId !== userId) throw new DomainError("No autorizada");
   return client.task.delete({ where: { id: parsedId } });
 }

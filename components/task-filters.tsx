@@ -13,12 +13,16 @@ export function TaskFilters({ estado, q, total }: { estado: string; q: string; t
   const router = useRouter();
   const sp = useSearchParams();
   const [qLocal, setQLocal] = useState(q);
+  const [qApplied, setQApplied] = useState(q);
   const timer = useRef<number | null>(null);
   const searchRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
+  // Si la URL cambia por fuera (atrás/adelante, enlace), el input se sincroniza
+  // durante el render: un efecto con setState provocaría un render en cascada.
+  if (q !== qApplied) {
+    setQApplied(q);
     setQLocal(q);
-  }, [q]);
+  }
 
   useEffect(() => {
     if (qLocal === q) return;

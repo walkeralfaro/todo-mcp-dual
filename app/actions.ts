@@ -2,11 +2,16 @@
 
 import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
+import { ZodError } from "zod";
 import { auth } from "@/lib/auth";
+import { DomainError } from "@/lib/errors";
 import { createTask, deleteTask, updateTask } from "@/lib/tasks";
 import { createTaskSchema, taskIdSchema, updateTaskSchema } from "@/lib/validators";
 
 export type ActionResult = { ok: true } | { ok: false; error: string };
+
+/** Mensaje único que ve el cliente cuando el fallo no es de validación. */
+const GENERIC_ERROR = "No se pudo completar la operación. Inténtalo de nuevo.";
 
 async function currentUserId(): Promise<string | null> {
   // Better Auth lee las cookies del header "cookie" de la solicitud real.
@@ -14,9 +19,22 @@ async function currentUserId(): Promise<string | null> {
   return session?.user?.id ?? null;
 }
 
+/**
+ * Traduce un fallo a la respuesta de la Server Action:
+ * - validación (Zod): el mensaje del esquema, escrito en español para el usuario;
+ * - error de negocio: su mensaje, ya redactado para el usuario;
+ * - cualquier otro fallo (Prisma, red…): mensaje genérico, con el detalle
+ *   únicamente en el log del servidor.
+ */
 function err(e: unknown): ActionResult {
-  if (e instanceof Error) return { ok: false, error: e.message };
-  return { ok: false, error: "Error inesperado" };
+  if (e instanceof ZodError) {
+    return { ok: false, error: e.issues[0]?.message ?? "Datos no válidos" };
+  }
+  if (e instanceof DomainError) {
+    return { ok: false, error: e.message };
+  }
+  console.error("[tareas] fallo interno en la Server Action:", e);
+  return { ok: false, error: GENERIC_ERROR };
 }
 
 export async function createTaskAction(formData: FormData): Promise<ActionResult> {

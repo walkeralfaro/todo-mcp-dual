@@ -18,26 +18,13 @@ interface DemoRow {
 const FILAS: DemoRow[] = [
   { id: "r1", titulo: "Pagar la luz", descripcion: "Domiciliada el día 20", creada: "12/10", estado: "PENDIENTE" },
   { id: "r2", titulo: "Preparar la demo del viernes", descripcion: "Enseñar /mcp y el token", creada: "13/10", estado: "EN_PROCESO" },
-  { id: "r3", titulo: "Escribir el resumen del sprint", descripcion: "Para el equipo, 200 palabras", creada: "14/10", estado: "PENDIENTE" },
-  {
-    id: "r4",
-    titulo: "Conectar el agente al MCP",
-    descripcion: "Añade /api/mcp a tu cliente con el token tmcp_ab12….",
-    creada: "15/10",
-    estado: "PENDIENTE",
-  },
-  { id: "r5", titulo: "Comprar café", creada: "9/10", cerrada: "10/10", estado: "COMPLETADA" },
-  { id: "r6", titulo: "Renovar el dominio", descripcion: "Antes del 30", creada: "15/10", estado: "PENDIENTE" },
-  { id: "r7", titulo: "Revisar la PR de filtros", creada: "16/10", estado: "EN_PROCESO" },
-  { id: "r8", titulo: "Regar las plantas", creada: "6/10", cerrada: "8/10", estado: "COMPLETADA" },
-  { id: "r9", titulo: "Llamar a la gestoría", descripcion: "IVA del trimestre", creada: "16/10", estado: "EN_PROCESO" },
-  { id: "r10", titulo: "Planificar la semana", creada: "11/10", cerrada: "12/10", estado: "COMPLETADA" },
+  { id: "r3", titulo: "Comprar café", creada: "9/10", cerrada: "10/10", estado: "COMPLETADA" },
 ];
 
 const BLOQUE: Record<DemoEstado, string> = {
   PENDIENTE: "bg-elevated text-muted",
   EN_PROCESO: "bg-ink text-ground",
-  COMPLETADA: "bg-accent text-[#06130c]",
+  COMPLETADA: "bg-accent text-on-accent",
 };
 
 function hoy(): string {
@@ -52,7 +39,7 @@ function hoy(): string {
  */
 export function DemoBoard(): React.JSX.Element {
   const [rows, setRows] = useState<DemoRow[]>(FILAS);
-  const [openId, setOpenId] = useState<string>("r4");
+  const [openId, setOpenId] = useState<string>("");
   const [draft, setDraft] = useState("");
   const nextId = useRef(1);
 
@@ -82,7 +69,22 @@ export function DemoBoard(): React.JSX.Element {
   };
 
   return (
-    <section id="lista" aria-label="Demostración del tablero de tareas">
+    <section id="lista" aria-labelledby="lista-title" className="scroll-mt-24">
+      <div className="mb-6 max-w-[680px]">
+        <p className="text-[13px] font-semibold uppercase tracking-[0.14em] text-accent">
+          Una sola lista
+        </p>
+        <h2
+          id="lista-title"
+          className="mt-3 text-[clamp(2rem,6vw,3.5rem)] font-semibold leading-[1.02] tracking-[-0.045em]"
+        >
+          Tu trabajo sigue conectado
+        </h2>
+        <p className="mt-4 text-[16px] leading-[1.6] text-muted sm:text-[17px]">
+          Añade una tarea aquí, cambia su estado y comprueba cómo se organiza
+          tu lista. Esta demostración vive solo en tu navegador.
+        </p>
+      </div>
       <div data-ui className="rounded-lg bg-ground">
         <form
           onSubmit={add}
@@ -130,7 +132,7 @@ export function DemoBoard(): React.JSX.Element {
                   onClick={() => setOpenId(open ? "" : row.id)}
                   className={cn(
                     "grid w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 px-4 py-3.5 text-left transition-colors duration-150 sm:grid-cols-12 sm:px-5 sm:py-0 sm:h-[72px]",
-                    open ? "bg-accent text-[#06130c]" : "bg-surface text-ink hover:bg-elevated active:bg-elevated",
+                    open ? "bg-accent text-on-accent" : "bg-surface text-ink hover:bg-elevated active:bg-elevated",
                   )}
                 >
                   <span className="flex min-w-0 items-start gap-2 sm:col-span-5">
@@ -140,10 +142,10 @@ export function DemoBoard(): React.JSX.Element {
                         "mt-[7px] h-2 w-2 shrink-0 rounded-full",
                         completada
                           ? open
-                            ? "bg-[#06130c]"
+                            ? "bg-on-accent"
                             : "bg-accent"
                           : open
-                            ? "bg-[#06130c]/30"
+                            ? "bg-on-accent/30"
                             : "bg-ink/20",
                       )}
                     />
@@ -154,7 +156,7 @@ export function DemoBoard(): React.JSX.Element {
                   <span
                     className={cn(
                       "hidden text-[13px] tabular-nums sm:col-span-2 sm:block",
-                      open ? "text-[#06130c]/80" : "text-muted",
+                      open ? "text-on-accent/80" : "text-muted",
                     )}
                   >
                     {row.creada}
@@ -162,7 +164,7 @@ export function DemoBoard(): React.JSX.Element {
                   <span
                     className={cn(
                       "hidden text-[13px] tabular-nums sm:col-span-2 sm:block",
-                      open ? "text-[#06130c]/80" : "text-muted",
+                      open ? "text-on-accent/80" : "text-muted",
                     )}
                   >
                     {row.cerrada ?? "·"}
@@ -179,7 +181,7 @@ export function DemoBoard(): React.JSX.Element {
 
                 {open && (
                   <div data-testid="demo-open-row" key={row.id} className="animate-shutter">
-                    <div className="animate-shutter-settle flex flex-col gap-3 bg-accent px-4 pb-5 pt-1 text-[#06130c] sm:px-5">
+                    <div className="animate-shutter-settle flex flex-col gap-3 bg-accent px-4 pb-5 pt-1 text-on-accent sm:px-5">
                       {row.descripcion && (
                         <p className="max-w-[62ch] text-[17px] leading-[1.5]">
                           {row.descripcion}

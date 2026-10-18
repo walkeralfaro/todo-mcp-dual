@@ -1,6 +1,5 @@
 import { PrismaClient } from "./generated/prisma/client";
 import { PrismaLibSql } from "@prisma/adapter-libsql";
-import { createClient } from "@libsql/client";
 
 /**
  * Cliente Prisma para tests contra Turso.

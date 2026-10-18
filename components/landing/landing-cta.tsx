@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { AuthModal, type AuthTab } from "@/components/ui-auth/auth-modal";
@@ -8,7 +8,7 @@ import { authClient } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
 
 export interface LandingCtaProps {
-  /** Variante visual: hero y cierre sobre el campo acento; footer en banda. */
+  /** Variante visual: hero/cierre en superficie oscura; footer compacto. */
   variant?: "hero" | "close" | "footer";
   /** Pestaña a abrir desde `?auth=login|register` (redirect de protección). */
   initialTab?: AuthTab | null;
@@ -33,14 +33,16 @@ export function LandingCta({
   const { data: session } = authClient.useSession();
   const [open, setOpen] = useState(initialTab !== null);
   const [tab, setTab] = useState<AuthTab>(initialTab ?? "login");
+  const [prevInitialTab, setPrevInitialTab] = useState(initialTab);
 
-  // Un redirect de protección (`?auth=...`) abre el modal una sola vez.
-  useEffect(() => {
-    if (initialTab) {
-      setTab(initialTab);
-      setOpen(true);
-    }
-  }, [initialTab]);
+  // Un redirect de protección (`?auth=...`) abre el modal una sola vez. Si la
+  // prop cambia (misma página con otro `?auth=`), el estado se ajusta durante
+  // el render en lugar de en un efecto.
+  if (initialTab && initialTab !== prevInitialTab) {
+    setPrevInitialTab(initialTab);
+    setTab(initialTab);
+    setOpen(true);
+  }
 
   const openModal = (targetTab: AuthTab) => {
     setTab(targetTab);
@@ -49,10 +51,10 @@ export function LandingCta({
 
   const big = variant !== "footer";
   const primaryClass = big
-    ? "h-12 bg-ground px-6 text-ink hover:bg-surface"
-    : "h-11 bg-accent px-4 text-[15px] hover:bg-accent/90";
+    ? "h-12 bg-accent px-6 text-on-accent hover:bg-accent/90"
+    : "h-11 bg-accent px-4 text-[15px] text-on-accent hover:bg-accent/90";
   const linkClass = big
-    ? "inline-flex h-11 items-center px-2 text-[15px] font-medium text-[#06130c] underline decoration-[#06130c]/40 underline-offset-4 transition-transform duration-150 hover:decoration-[#06130c] active:translate-y-px"
+    ? "inline-flex h-11 items-center px-2 text-[15px] font-medium text-ink underline decoration-ink/30 underline-offset-4 transition-colors hover:decoration-ink/70"
     : null;
 
   if (session?.user) {

@@ -37,7 +37,7 @@ AI Agent -> /api/[transport] (mcp-handler)
 | Framework | Next.js 16 App Router, React 19 |
 | Estilos | Tailwind CSS 4, shadcn/ui, lucide-react |
 | Persistencia | Prisma 7 + SQLite (`file:../dev.db`), adapter libSQL/Turso para prod |
-| IA | `@modelcontextprotocol/server`, `mcp-handler`, `@vercel/mcp-adapter` |
+| IA | `mcp-handler` sobre `@modelcontextprotocol/server` |
 | Validación | Zod 4 |
 | Tests | Vitest 5, Playwright 1.64 |
 
@@ -68,7 +68,7 @@ DATABASE_URL="file:../dev.db"
 ```
 
 > [!TIP]
-> E2E corre contra Turso-test: `playwright.config.ts` limpia la tabla `Task` y levanta el server con `TURSO_*` del entorno. Lanza con `set -a; source .env; npx playwright test`.
+> E2E corre contra Turso-test: `playwright.config.ts` exige `TURSO_*` en el entorno, limpia las tablas y levanta el server. `npm run test:e2e` carga `.env` por sí solo (`node --env-file=.env`); solo necesitas parar cualquier `npm run dev` previo en el puerto 3000.
 
 ## Deploy a Vercel (Turso prod)
 
@@ -139,7 +139,7 @@ Respuestas en formato MCP:
 
 Errores: `{ content: [{ type: 'text', text: '{"error":"..."}' }], isError: true }`.
 
-Límites Zod en `lib/validators.ts`: título 1-100, descripción max 500, `listTasksSchema` con `limit` max 100.
+Límites Zod en `lib/validators.ts`: título 1-100, descripción max 500, `listTasksSchema` con `limit` max 100. Los esquemas publicados en `tools/list` describen el tipo de cada campo y sus límites en la descripción; la validación (y sus mensajes en español) se aplica en `lib/validators.ts`, así que el error que recibe el agente es controlado y en español.
 
 ## Data Model
 
@@ -169,48 +169,66 @@ Además, `McpToken` guarda los accesos MCP (hash SHA-256 + prefijo visible, `exp
 
 ```bash
 npm run dev       # desarrollo
-npm run build     # prisma generate + next build
+npm run build     # esquema Turso idempotente + prisma generate + next build
 npm start         # producción
+npm run lint      # ESLint 9 con eslint-config-next (config plana) — no necesita entorno
+npm run typecheck # tsc --noEmit — no necesita entorno
 npm test          # Vitest (contra Turso-test: set -a; source .env primero)
 npm run test:watch
-npx playwright test  # E2E (contra Turso-test, limpia Task antes de arrancar)
-npx prisma db push   # sincronizar schema SQLite local
+npm run test:e2e  # E2E Playwright (carga .env por sí solo; limpia tablas antes de arrancar)
+npm run db:push      # sincronizar schema SQLite local
+npm run db:migrate   # prisma migrate deploy
 node scripts/apply-schema-turso.mjs  # aplicar esquema a Turso (con TURSO_* en entorno)
-node scripts/clean-turso-test.mjs    # vaciar Task en Turso-test
+node scripts/clean-turso-test.mjs    # vaciar tablas de Turso-test
 ```
 
 ## Testing
 
-- `lib/validators.test.ts`, `app/actions.test.ts`, `app/api/[transport]/route.test.ts`, `components/task-item.test.tsx` — sin Turso (local/mocks).
-- `lib/tasks.test.ts`, `lib/mcp.test.ts` — integración contra Turso-test con limpieza por `DELETE FROM Task` (helper `lib/test-db.ts`).
-- `e2e/todo.spec.ts` — flujo crear/listar/actualizar contra Turso-test.
+Comandos y entorno que necesita cada uno:
+
+| Comando | Entorno | Qué cubre |
+| --- | --- | --- |
+| `npm run lint` | — | ESLint (Next 16 + TypeScript) |
+| `npm run typecheck` | — | `tsc --noEmit` |
+| `npm test` | `TURSO_*` exportados | Vitest completo (unitarios + integración) |
+| `npm run test:e2e` | `.env` (lo carga el propio script) | Playwright E2E |
+
+- Sin Turso (mocks o funciones puras): `app/actions.test.ts`, `app/mcp/actions.test.ts`, `lib/validators.test.ts`, `lib/auth-error.test.ts`, `lib/auth-redirect.test.ts`, `components/task-item.test.tsx`, `components/ui/button.test.tsx`.
+- Integración contra Turso-test (helper `lib/test-db.ts`, limpieza por tablas): `lib/tasks.test.ts`, `lib/mcp.test.ts`, `lib/mcp-tokens.test.ts`, `app/api/[transport]/route.test.ts` (esta última cubre `tools/list`, `tools/call` y los errores de validación por la ruta real).
+- E2E (`e2e/`): `landing.spec.ts`, `todo.spec.ts`, `todo-auth.spec.ts`, `proteccion.spec.ts`, `mcp-tokens.spec.ts`, `titular.spec.ts`, `nav-movil.spec.ts` — contra Turso-test; `playwright.config.ts` limpia las tablas y levanta el server antes de arrancar.
 
 ```bash
-set -a; source .env   # expone TURSO_* de TEST (Vitest/Playwright no leen .env solos)
+npm run lint
+npm run typecheck
+
+set -a; source .env   # expone TURSO_* de TEST (Vitest no lee .env solo)
 npm test
-npx playwright test
+
+npm run test:e2e      # carga .env por sí solo y limpia Task antes de arrancar
 ```
 
 ## Project Structure
 
 ```text
 app/
-  layout.tsx            # navbar compartida (sesión)
+  layout.tsx            # header compartido (sesión)
   page.tsx              # landing pública
   (protegido)/tareas/page.tsx  # lista + filtros + form
   (protegido)/mcp/page.tsx     # tokens MCP
   actions.ts            # Server Actions de tareas
   mcp/actions.ts        # Server Actions de tokens MCP
-  api/[transport]/route.ts  # servidor MCP
+  api/[transport]/route.ts  # servidor MCP (auth Bearer + tools ligadas al usuario)
 components/
   site-header.tsx task-form.tsx task-item.tsx task-filters.tsx day-headline.tsx
-  landing/ mcp/         # landing y componentes de tokens
+  landing/ mcp/ ui/ ui-auth/  # landing, tokens MCP y primitivas
 lib/
   tasks.ts mcp-tokens.ts mcp-auth.ts validators.ts mcp.ts db.ts
+  errors.ts use-origin.ts     # error de dominio y origen del cliente
   generated/prisma/  # cliente Prisma 7 (generado, no commitear)
+eslint.config.mjs postcss.config.mjs vitest.config.ts playwright.config.ts
 prisma.config.ts  # datasource URL para el CLI (Prisma 7)
 prisma/schema.prisma
-e2e/todo.spec.ts e2e/todo-auth.spec.ts e2e/proteccion.spec.ts e2e/mcp-tokens.spec.ts
+e2e/  # landing, todo, todo-auth, proteccion, mcp-tokens, titular, nav-movil
 openspec/ requirement.md AGENTS.md
 ```
 
@@ -219,5 +237,6 @@ openspec/ requirement.md AGENTS.md
 - `DATABASE_URL` no encontrada: copia `.env.example` a `.env`, default `file:../dev.db` en `lib/db.ts:16`.
 - DB vacía / schema desactualizado (local): `npx prisma db push`.
 - `P1012 the URL must start with file:` al apuntar a Turso: esperado, el CLI no soporta `libsql://`. Usa `node scripts/apply-schema-turso.mjs` con `TURSO_*` en entorno.
-- Tests contra Turso fallan con "faltan TURSO_*": Vitest no lee `.env` solo; lanza con `set -a; source .env` antes.
-- E2E falla por puerto ocupado: Playwright usa `reuseExistingServer: false`, cierra `npm run dev` en puerto 3000 antes de `npx playwright test`.
+- Tests contra Turso fallan con "faltan TURSO_*": Vitest no lee `.env` solo; lanza `set -a; source .env` antes de `npm test`. `npm run test:e2e` sí lo carga por su cuenta.
+- Timeout de conexión contra Turso (`ConnectTimeoutError` / `fetch failed`): fallo de red del entorno hacia `*.turso.io`, no del test. Reintenta el comando; el resto de la suite sigue en verde.
+- E2E falla por puerto ocupado: Playwright usa `reuseExistingServer: false`, cierra `npm run dev` en puerto 3000 antes de `npm run test:e2e`.

@@ -1,6 +1,6 @@
 import { PrismaClient } from "./generated/prisma/client";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
-import { createTask, deleteTask, getTask, listTasks, updateTask } from "./tasks";
+import { createTask, countPendingTasks, deleteTask, getTask, listTasks, updateTask } from "./tasks";
 import { cleanTasks, createTestUser, newTestClient } from "./test-db";
 
 let client: PrismaClient;
@@ -70,6 +70,37 @@ describe("tasks service", () => {
     const found = await listTasks({ limit: 50, offset: 0, userId }, client);
     expect(found.length).toBe(1);
     expect(found[0].titulo).toBe("Tarea propia");
+  });
+
+  it("cuenta 0 cuando no quedan tareas no completadas", async () => {
+    const t = await createTask({ titulo: "Hecha", userId }, client);
+    await updateTask(t.id, { estado: "COMPLETADA" }, userId, client);
+    expect(await countPendingTasks(userId, client)).toBe(0);
+  });
+
+  it("cuenta PENDIENTE y EN_PROCESO y excluye COMPLETADA", async () => {
+    await createTask({ titulo: "Pendiente", userId }, client);
+    const enProceso = await createTask({ titulo: "En proceso", userId }, client);
+    await updateTask(enProceso.id, { estado: "EN_PROCESO" }, userId, client);
+    const hecha = await createTask({ titulo: "Hecha", userId }, client);
+    await updateTask(hecha.id, { estado: "COMPLETADA" }, userId, client);
+    expect(await countPendingTasks(userId, client)).toBe(2);
+  });
+
+  it("no cuenta tareas de otro usuario", async () => {
+    const otroUsuario = await createTestUser(client, "otro3@prueba.test");
+    await createTask({ titulo: "Ajena", userId: otroUsuario }, client);
+    await createTask({ titulo: "Propia", userId }, client);
+    expect(await countPendingTasks(userId, client)).toBe(1);
+  });
+
+  it("cuenta todas las no completadas aunque superen la ventana del listado", async () => {
+    for (let i = 0; i < 3; i += 1) {
+      await createTask({ titulo: `Pendiente ${i}`, userId }, client);
+    }
+    const ventana = await listTasks({ limit: 1, offset: 0, userId }, client);
+    expect(ventana).toHaveLength(1);
+    expect(await countPendingTasks(userId, client)).toBe(3);
   });
 
   it("rechaza acceder a tarea de otro usuario", async () => {

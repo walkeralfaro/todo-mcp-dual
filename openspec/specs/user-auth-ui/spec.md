@@ -26,7 +26,7 @@ El sistema SHALL mostrar un único modal (Dialog) con dos pestañas, "Iniciar se
 - **THEN** el modal permanece abierto, conserva los valores tecleados y muestra un único mensaje de error en español; si el envío tiene éxito o falla, el estado pendiente se desactiva
 
 ### Requirement: Botones de autenticación en el header
-El sistema SHALL mostrar una navbar compartida en la landing y en la página de tareas, con la marca, los enlaces de navegación y las acciones de sesión: "Iniciar sesión" y "Registrarse" cuando no hay sesión (abriendo el modal de cuenta); avatar del usuario, enlaces "Mis tareas" y "Tokens MCP", y "Cerrar sesión" cuando hay sesión. El titular del día de la página de tareas SHALL quedar debajo de la navbar.
+El sistema SHALL mostrar una navbar compartida en la landing y en la página de tareas, con la marca, los enlaces de navegación y las acciones de sesión: "Iniciar sesión" y "Registrarse" cuando no hay sesión (abriendo el modal de cuenta); avatar del usuario, enlaces "Mis tareas" y "Tokens MCP", y "Cerrar sesión" cuando hay sesión. Las acciones y enlaces interactivos visibles del header SHALL ofrecer un área táctil mínima de 44 × 44 píxeles CSS. Todas las acciones y enlaces de sesión de la navbar SHALL ser alcanzables en todos los anchos responsivos, incluido móvil (<640px), sin depender de un ancho mínimo de pantalla. El titular del día de la página de tareas SHALL quedar debajo de la navbar.
 
 #### Scenario: Header sin sesión muestra botones de entrada
 - **WHEN** no hay sesión de usuario autenticada
@@ -47,6 +47,14 @@ El sistema SHALL mostrar una navbar compartida en la landing y en la página de 
 #### Scenario: Misma navbar en landing y app
 - **WHEN** el usuario navega entre `/` y `/tareas`
 - **THEN** la navbar mantiene estructura, marca y acciones de sesión en ambas páginas
+
+#### Scenario: Controles del header cómodos al tacto
+- **WHEN** la navbar muestra acciones interactivas en cualquier ancho responsive
+- **THEN** cada botón y enlace visible ofrece un área de interacción de al menos 44 × 44 píxeles CSS y conserva un indicador de foco visible
+
+#### Scenario: Enlaces de sesión alcanzables en móvil
+- **WHEN** un usuario autenticado abre la app a 390px de ancho
+- **THEN** puede alcanzar desde la navbar los enlaces "Mis tareas" y "Tokens MCP" (visibles o tras desplegar una navegación móvil accesible), además de "Cerrar sesión", sin que ningún control quede oculto ni recortado
 
 ### Requirement: Creación de tareas solo para usuarios autenticados
 El sistema SHALL permitir crear, editar y eliminar tareas únicamente cuando exista una sesión de usuario autenticada. La página de tareas SHALL existir solo en `/tareas` y SHALL estar protegida (ver "Rutas protegidas de la aplicación"), de modo que el formulario de creación esté siempre presente para el usuario autenticado y nunca se oculte condicionalmente dentro de la página.

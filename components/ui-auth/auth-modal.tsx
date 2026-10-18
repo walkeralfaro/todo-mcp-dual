@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
@@ -60,14 +60,18 @@ export function AuthModal({
   const isLogin = tab === "login";
 
   // Aperturas distintas empiezan limpias (entre pestañas y tras un fallo se
-  // conservan los valores; entre abrir y cerrar el modal, no).
-  useEffect(() => {
-    if (open) return;
-    setError(null);
-    setEmail("");
-    setPassword("");
-    setName("");
-  }, [open]);
+  // conservan los valores; al reabrir el modal, no). Se ajusta durante el
+  // render: un efecto con setState provocaría un render en cascada.
+  const [wasOpen, setWasOpen] = useState(open);
+  if (open !== wasOpen) {
+    setWasOpen(open);
+    if (open) {
+      setError(null);
+      setEmail("");
+      setPassword("");
+      setName("");
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -99,7 +103,7 @@ export function AuthModal({
       } else {
         router.push(target);
       }
-    } catch (e) {
+    } catch {
       const message = "Error de autenticación. Inténtalo de nuevo.";
       setError(message);
       onAuthError?.(message);
