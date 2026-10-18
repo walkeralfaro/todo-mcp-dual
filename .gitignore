@@ -6,6 +6,7 @@ lib/generated/
 *.db-journal
 .env
 .opencode/
+.agents/
 .playwright-cli/
 .taste-skill/
 !.env.example

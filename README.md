@@ -30,6 +30,14 @@ AI Agent -> /api/[transport] (mcp-handler)
 > [!NOTE]
 > `lib/tasks.ts` es la única capa de negocio. `app/actions.ts` y `lib/mcp.ts` son adaptadores delgados con validación Zod y formato de respuesta propio.
 
+## Cómo está hecha
+
+El proyecto se explica a sí mismo: la ruta `/arquitectura` (en desarrollo, [localhost:3000/arquitectura](http://localhost:3000/arquitectura)) sirve un documento interactivo con el mapa de componentes, el modelo de datos (ERD) y las secuencias de la web y del agente MCP, con temas claro y oscuro y navegación por nodos.
+
+- Es un HTML **autocontenido**: todo el CSS, el JavaScript y los diagramas viajan dentro del archivo, sin CDN ni peticiones de red, así que se lee offline y no depende de terceros.
+- La fuente de verdad es `docs/arquitectura-todo-mcp.html` (versionada junto a sus recibos de archify) y se publica como estático con `scripts/sync-arquitectura.mjs`, que `npm run dev` y `npm run build` ejecutan antes de arrancar (ver "Scripts").
+- Se generó con [archify](https://github.com/tt-a1i/archify), que figura como atribución dentro del documento: es su único enlace externo, y es un enlace, no una carga de recursos.
+
 ## Tech Stack
 
 | Capa | Tecnología |
@@ -86,6 +94,7 @@ DATABASE_URL="file:../dev.db"
 - `/` — landing pública (presentación y acceso con sesión).
 - `/tareas` — app de tareas (protegida): lista + filtros + formulario.
 - `/mcp` — tokens MCP (protegida): generar, copiar una vez y revocar.
+- `/arquitectura` — documento interactivo de arquitectura (público): lo sirve `public/arquitectura.html`, sin sesión; ver "Cómo está hecha".
 - `/tareas?estado=PENDIENTE&q=texto` — filtro + búsqueda en título/descripción.
 - Crear desde `components/task-form.tsx`, cambiar estado / borrar desde `components/task-item.tsx`
 
@@ -180,7 +189,11 @@ npm run db:push      # sincronizar schema SQLite local
 npm run db:migrate   # prisma migrate deploy
 node scripts/apply-schema-turso.mjs  # aplicar esquema a Turso (con TURSO_* en entorno)
 node scripts/clean-turso-test.mjs    # vaciar tablas de Turso-test
+node scripts/sync-arquitectura.mjs   # publicar docs/arquitectura-todo-mcp.html en public/arquitectura.html
 ```
+
+> [!NOTE]
+> `npm run dev` y `npm run build` publican antes la documentación de arquitectura desde `docs/` (hooks `predev`/`prebuild`, script tolerante si el documento falta), así que `public/arquitectura.html` nunca queda desfasado por editar la fuente.
 
 ## Testing
 
@@ -195,7 +208,7 @@ Comandos y entorno que necesita cada uno:
 
 - Sin Turso (mocks o funciones puras): `app/actions.test.ts`, `app/mcp/actions.test.ts`, `lib/validators.test.ts`, `lib/auth-error.test.ts`, `lib/auth-redirect.test.ts`, `components/task-item.test.tsx`, `components/ui/button.test.tsx`.
 - Integración contra Turso-test (helper `lib/test-db.ts`, limpieza por tablas): `lib/tasks.test.ts`, `lib/mcp.test.ts`, `lib/mcp-tokens.test.ts`, `app/api/[transport]/route.test.ts` (esta última cubre `tools/list`, `tools/call` y los errores de validación por la ruta real).
-- E2E (`e2e/`): `landing.spec.ts`, `todo.spec.ts`, `todo-auth.spec.ts`, `proteccion.spec.ts`, `mcp-tokens.spec.ts`, `titular.spec.ts`, `nav-movil.spec.ts` — contra Turso-test; `playwright.config.ts` limpia las tablas y levanta el server antes de arrancar.
+- E2E (`e2e/`): `landing.spec.ts`, `todo.spec.ts`, `todo-auth.spec.ts`, `proteccion.spec.ts`, `mcp-tokens.spec.ts`, `titular.spec.ts`, `nav-movil.spec.ts`, `arquitectura.spec.ts` — contra Turso-test; `playwright.config.ts` limpia las tablas y levanta el server antes de arrancar.
 
 ```bash
 npm run lint
@@ -228,7 +241,7 @@ lib/
 eslint.config.mjs postcss.config.mjs vitest.config.ts playwright.config.ts
 prisma.config.ts  # datasource URL para el CLI (Prisma 7)
 prisma/schema.prisma
-e2e/  # landing, todo, todo-auth, proteccion, mcp-tokens, titular, nav-movil
+e2e/  # landing, todo, todo-auth, proteccion, mcp-tokens, titular, nav-movil, arquitectura
 openspec/ requirement.md AGENTS.md
 ```
 

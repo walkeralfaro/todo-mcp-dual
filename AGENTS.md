@@ -9,6 +9,7 @@ Este documento guía el comportamiento, los flujos de trabajo y las restriccione
 - **Persistencia:** SQLite gestionada a través de Prisma ORM.
 - **MCP Backend:** Implementado en la ruta `/api/mcp` con `mcp-handler` sobre `@modelcontextprotocol/server`. Validación estricta de payloads con Zod en `lib/validators.ts`; el `userId` de cada tool sale siempre del token Bearer, nunca del cuerpo JSON-RPC.
 - **Principio de Estado Único:** Las Server Actions del frontend y las *Tools* del servidor MCP comparten exactamente la misma capa de Prisma y la base de datos SQLite. No deben existir duplicidades de lógica de negocio en la capa de datos.
+- **Documentación de arquitectura:** `docs/arquitectura-todo-mcp.html` es el documento interactivo autocontenido (generado con archify, versionado con sus recibos `.finalize.json`) y es la fuente de verdad. `scripts/sync-arquitectura.mjs` lo publica en `public/arquitectura.html` y `next.config.ts` lo sirve en `/arquitectura`. Los hooks `predev`/`prebuild` ejecutan esa copia antes de arrancar y de compilar, de modo que `public/arquitectura.html` no se edita ni se regenera a mano: se actualiza re-ejecutando el script (`npm run prebuild`).
 
 ---
 

@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Menu, X } from "lucide-react";
+import { Menu, Network, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { authClient } from "@/lib/auth-client";
 import { AuthModal, type AuthTab } from "@/components/ui-auth/auth-modal";
@@ -240,6 +240,27 @@ export function SiteHeader(): React.JSX.Element {
               </Button>
             </div>
           )}
+
+          {/* Enlace secundario: explica cómo está construida la app. Apunta al
+              documento estático publicado en `/arquitectura` y lo abre en otra
+              pestaña para no perder la demo. Se oculta por debajo de `sm`,
+              donde el header no tiene espacio: en móvil con sesión vive en el
+              panel `#mobile-nav` y, sin sesión, en el pie de la landing.
+              Entre `sm` y `lg` va solo con icono (con `aria-label`): la
+              etiqueta no cabe junto a los enlaces de sesión sin partir el
+              resto de controles en varias líneas. */}
+          <a
+            href="/arquitectura"
+            target="_blank"
+            rel="noreferrer"
+            data-testid="nav-arquitectura"
+            aria-label="Cómo está hecha"
+            title="Cómo está hecha"
+            className="hidden h-11 min-w-11 items-center gap-2 rounded-md px-3 text-[15px] text-muted transition-colors duration-150 hover:bg-elevated hover:text-ink sm:inline-flex"
+          >
+            <Network aria-hidden="true" className="size-4" />
+            <span className="hidden lg:inline">Cómo está hecha</span>
+          </a>
         </div>
       </div>
 
@@ -268,6 +289,17 @@ export function SiteHeader(): React.JSX.Element {
           >
             Tokens MCP
           </Link>
+          <a
+            href="/arquitectura"
+            target="_blank"
+            rel="noreferrer"
+            data-testid="nav-arquitectura-movil"
+            className={cn(panelLinkClass("/arquitectura"), "gap-2")}
+            onClick={() => setNavOpen(false)}
+          >
+            <Network aria-hidden="true" className="size-4" />
+            Cómo está hecha
+          </a>
         </nav>
       )}
 

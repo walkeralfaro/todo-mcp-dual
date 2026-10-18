@@ -74,6 +74,17 @@ export function LandingFooter(): React.JSX.Element {
               Tokens MCP
             </Link>
           </li>
+          <li>
+            <a
+              href="/arquitectura"
+              target="_blank"
+              rel="noreferrer"
+              data-testid="footer-arquitectura"
+              className="inline-flex min-h-11 items-center text-[14px] text-muted transition-colors hover:text-ink"
+            >
+              Cómo está hecha
+            </a>
+          </li>
         </ul>
       </nav>
       <p className="mt-4 text-[12px] text-muted">© 2026 Todo App</p>
