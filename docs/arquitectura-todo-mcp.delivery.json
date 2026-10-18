@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "3bac32fb-9a25-4c5d-bef8-250fdb36cc63",
+  "status": "current",
+  "command": "deliver",
+  "type": "explainer",
+  "input": "/home/walker/Documentos/TODO-mcp/.archify/explainer-todo-mcp-20261018-134032/candidate.archify.md",
+  "output": "/home/walker/Documentos/TODO-mcp/docs/arquitectura-todo-mcp.html",
+  "specification": {
+    "sha256": "8e9e428f39495b97c1cf969b1711d10347b2caf73f161e95d691478834530c7a",
+    "bytes": 17778
+  },
+  "artifact": {
+    "sha256": "057f7aa381b8712247d79e2b8008447652e711a1273974e95b5d755374de58e7",
+    "bytes": 1860407
+  },
+  "explainer": {
+    "preparedSha256": "44274025b553ff7ac75eca13f9ec9a8f55d9a7f19012f80801b0512fc0eb815a",
+    "dependencies": [
+      {
+        "kind": "diagram-spec",
+        "id": "diagrama-app",
+        "inline": true,
+        "sha256": "02f1ee705946e9de5813696705dc57b817cc3ab0c876618a56598380855c5cf0",
+        "bytes": 2180
+      },
+      {
+        "kind": "diagram-spec",
+        "id": "modelo-datos",
+        "inline": true,
+        "sha256": "ac70c4f2a99814a1700425696d216fc55718d748c150461b3d5236702761086c",
+        "bytes": 2066
+      },
+      {
+        "kind": "diagram-spec",
+        "id": "flujo-web-diagram",
+        "inline": true,
+        "sha256": "f9e671c4aa89dd4c3649c4a7cb91a091c1fcc60ac40923bb53e27b254f044a10",
+        "bytes": 1111
+      },
+      {
+        "kind": "diagram-spec",
+        "id": "flujo-mcp-diagram",
+        "inline": true,
+        "sha256": "6bd09a35625d7983f88452452a0f277ffffaabea56d788c3ea28455be180d88a",
+        "bytes": 1569
+      }
+    ]
+  }
+}

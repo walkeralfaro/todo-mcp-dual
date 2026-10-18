@@ -1,0 +1,863 @@
+{
+  "schemaVersion": 1,
+  "ok": true,
+  "command": "finalize",
+  "status": "pass",
+  "type": "explainer",
+  "quality": "showcase",
+  "startedAt": "2026-10-18T18:41:26.537Z",
+  "specification": {
+    "path": "/home/walker/Documentos/TODO-mcp/.archify/explainer-todo-mcp-20261018-134032/candidate.archify.md",
+    "sha256": "8e9e428f39495b97c1cf969b1711d10347b2caf73f161e95d691478834530c7a",
+    "bytes": 17778
+  },
+  "artifact": {
+    "path": "/home/walker/Documentos/TODO-mcp/docs/arquitectura-todo-mcp.html",
+    "sha256": "057f7aa381b8712247d79e2b8008447652e711a1273974e95b5d755374de58e7",
+    "bytes": 1860407
+  },
+  "stages": {
+    "browser-check": {
+      "status": "not-run",
+      "execution": "not-requested"
+    },
+    "validate": {
+      "status": "pass",
+      "exitCode": 0,
+      "durationMs": null,
+      "execution": "embedded-in-deliver",
+      "command": [
+        "/home/walker/.nvm/versions/node/v24.16.0/bin/node",
+        "/home/walker/Documentos/TODO-mcp/.opencode/skills/archify/bin/archify.mjs",
+        "deliver",
+        "explainer",
+        "/home/walker/Documentos/TODO-mcp/.archify/explainer-todo-mcp-20261018-134032/candidate.archify.md",
+        "/home/walker/Documentos/TODO-mcp/docs/arquitectura-todo-mcp.html",
+        "--quality",
+        "showcase",
+        "--repo-root",
+        "/home/walker/Documentos/TODO-mcp",
+        "--json"
+      ],
+      "receipt": {
+        "schemaVersion": 1,
+        "ok": true,
+        "command": "validate",
+        "specification": {
+          "sha256": "8e9e428f39495b97c1cf969b1711d10347b2caf73f161e95d691478834530c7a",
+          "bytes": 17778
+        },
+        "validation": {
+          "checksPassed": 4,
+          "checkCount": 4,
+          "compositionProfile": "showcase",
+          "compositionStatus": "pass",
+          "errors": 0,
+          "warnings": 0
+        }
+      }
+    },
+    "deliver": {
+      "status": "pass",
+      "exitCode": 0,
+      "durationMs": 3138,
+      "command": [
+        "/home/walker/.nvm/versions/node/v24.16.0/bin/node",
+        "/home/walker/Documentos/TODO-mcp/.opencode/skills/archify/bin/archify.mjs",
+        "deliver",
+        "explainer",
+        "/home/walker/Documentos/TODO-mcp/.archify/explainer-todo-mcp-20261018-134032/candidate.archify.md",
+        "/home/walker/Documentos/TODO-mcp/docs/arquitectura-todo-mcp.html",
+        "--quality",
+        "showcase",
+        "--repo-root",
+        "/home/walker/Documentos/TODO-mcp",
+        "--json"
+      ],
+      "receipt": {
+        "schemaVersion": 1,
+        "receiptId": "3bac32fb-9a25-4c5d-bef8-250fdb36cc63",
+        "ok": true,
+        "command": "deliver",
+        "type": "explainer",
+        "input": "/home/walker/Documentos/TODO-mcp/.archify/explainer-todo-mcp-20261018-134032/candidate.archify.md",
+        "output": "/home/walker/Documentos/TODO-mcp/docs/arquitectura-todo-mcp.html",
+        "explainer": {
+          "preparedSha256": "44274025b553ff7ac75eca13f9ec9a8f55d9a7f19012f80801b0512fc0eb815a",
+          "dependencies": [
+            {
+              "kind": "diagram-spec",
+              "id": "diagrama-app",
+              "inline": true,
+              "sha256": "02f1ee705946e9de5813696705dc57b817cc3ab0c876618a56598380855c5cf0",
+              "bytes": 2180
+            },
+            {
+              "kind": "diagram-spec",
+              "id": "modelo-datos",
+              "inline": true,
+              "sha256": "ac70c4f2a99814a1700425696d216fc55718d748c150461b3d5236702761086c",
+              "bytes": 2066
+            },
+            {
+              "kind": "diagram-spec",
+              "id": "flujo-web-diagram",
+              "inline": true,
+              "sha256": "f9e671c4aa89dd4c3649c4a7cb91a091c1fcc60ac40923bb53e27b254f044a10",
+              "bytes": 1111
+            },
+            {
+              "kind": "diagram-spec",
+              "id": "flujo-mcp-diagram",
+              "inline": true,
+              "sha256": "6bd09a35625d7983f88452452a0f277ffffaabea56d788c3ea28455be180d88a",
+              "bytes": 1569
+            }
+          ]
+        },
+        "specification": {
+          "sha256": "8e9e428f39495b97c1cf969b1711d10347b2caf73f161e95d691478834530c7a",
+          "bytes": 17778
+        },
+        "artifact": {
+          "sha256": "057f7aa381b8712247d79e2b8008447652e711a1273974e95b5d755374de58e7",
+          "bytes": 1860407
+        },
+        "validation": {
+          "checksPassed": 4,
+          "checkCount": 4,
+          "compositionProfile": "showcase",
+          "compositionStatus": "pass",
+          "errors": 0,
+          "warnings": 0
+        },
+        "update": {
+          "status": "unavailable",
+          "installedVersion": null,
+          "availableVersion": null,
+          "releaseNotes": null,
+          "checkedAt": null,
+          "source": null,
+          "noticeRequired": false,
+          "noticeText": null,
+          "reason": "disabled"
+        }
+      }
+    },
+    "check": {
+      "status": "pass",
+      "exitCode": 0,
+      "durationMs": 1448,
+      "command": [
+        "/home/walker/.nvm/versions/node/v24.16.0/bin/node",
+        "/home/walker/Documentos/TODO-mcp/.opencode/skills/archify/bin/archify.mjs",
+        "check",
+        "/home/walker/Documentos/TODO-mcp/docs/arquitectura-todo-mcp.html",
+        "--require-provenance"
+      ],
+      "receipt": {
+        "ok": true,
+        "file": "/home/walker/Documentos/TODO-mcp/docs/arquitectura-todo-mcp.html",
+        "family": "explainer",
+        "artifact": {
+          "sha256": "057f7aa381b8712247d79e2b8008447652e711a1273974e95b5d755374de58e7",
+          "bytes": 1860407
+        },
+        "checks": [
+          {
+            "name": "explainer_structure",
+            "ok": true,
+            "details": [
+              "182 unique DOM IDs"
+            ]
+          },
+          {
+            "name": "explainer_payload_identity",
+            "ok": true,
+            "details": []
+          },
+          {
+            "name": "explainer_dependencies",
+            "ok": true,
+            "details": [
+              "4 frozen dependencies"
+            ]
+          },
+          {
+            "name": "explainer_native_diagrams",
+            "ok": true,
+            "details": [
+              "diagrama-app: pass",
+              "modelo-datos: pass",
+              "flujo-web-diagram: pass",
+              "flujo-mcp-diagram: pass"
+            ]
+          }
+        ],
+        "composition": {
+          "schemaVersion": 1,
+          "profile": "showcase",
+          "status": "pass",
+          "summary": {
+            "errors": 0,
+            "warnings": 0
+          },
+          "issues": [],
+          "nativeDiagrams": [
+            {
+              "id": "diagrama-app",
+              "receipt": {
+                "ok": true,
+                "file": "/tmp/archify-explainer-check-bOzbCl/child.html",
+                "artifact": {
+                  "sha256": "b6a05ec57fd6d3756b9e65272ffbee1b6d6e1fc3323a823e244032b56e17e1a3",
+                  "bytes": 831970
+                },
+                "checks": [
+                  {
+                    "name": "single_svg",
+                    "ok": true,
+                    "details": [
+                      "found 1 <svg> block(s)"
+                    ]
+                  },
+                  {
+                    "name": "finite_svg",
+                    "ok": true,
+                    "details": []
+                  },
+                  {
+                    "name": "orthogonal_arrows",
+                    "ok": true,
+                    "details": []
+                  },
+                  {
+                    "name": "label_route_clearance",
+                    "ok": true,
+                    "details": []
+                  },
+                  {
+                    "name": "relationship_crossings",
+                    "ok": true,
+                    "details": []
+                  },
+                  {
+                    "name": "relationship_corridors",
+                    "ok": true,
+                    "details": []
+                  },
+                  {
+                    "name": "container_border_runs",
+                    "ok": true,
+                    "details": []
+                  },
+                  {
+                    "name": "route_rhythm",
+                    "ok": true,
+                    "details": []
+                  },
+                  {
+                    "name": "legend_clearance",
+                    "ok": true,
+                    "details": []
+                  }
+                ],
+                "composition": {
+                  "schemaVersion": 1,
+                  "profile": "showcase",
+                  "status": "pass",
+                  "summary": {
+                    "errors": 0,
+                    "warnings": 0
+                  },
+                  "metrics": {
+                    "properCrossings": 0,
+                    "resolvedCrossovers": 1,
+                    "ambiguousCorridors": 0,
+                    "arrowheadCollisions": 0,
+                    "containerBorderRuns": 0,
+                    "labelRouteClearanceIssues": 0,
+                    "labelCanvasOverflowIssues": 0,
+                    "minLabelRouteClearance": 5,
+                    "desktopReadabilityIssues": 0,
+                    "viewportHeightIssues": 0,
+                    "minProjectedNodeTextPx": 6.815189873417721,
+                    "maxBends": 3,
+                    "routesOverSuggestedBends": 1,
+                    "maxStretch": 1,
+                    "routesOverSuggestedStretch": 0,
+                    "minSegmentPx": 24,
+                    "minInteriorSegmentPx": 84.5,
+                    "shortSegmentCount": 0,
+                    "shortEndpointSegmentCount": 0,
+                    "shortInteriorSegmentCount": 0,
+                    "microSegmentCount": 0
+                  },
+                  "suggestedLimits": {
+                    "bendsPerRelationship": 2,
+                    "stretch": 1.35,
+                    "segmentPx": 16,
+                    "microSegmentPx": 8
+                  },
+                  "routeReview": {
+                    "crossings": [
+                      {
+                        "left": {
+                          "id": "pages-to-actions-1",
+                          "from": "pages",
+                          "to": "actions",
+                          "label": "Server Actions",
+                          "collectionIndex": 2,
+                          "artifactIndex": 3
+                        },
+                        "right": {
+                          "id": "bearer-to-db-1",
+                          "from": "bearer",
+                          "to": "db",
+                          "label": "busca McpToken",
+                          "collectionIndex": 8,
+                          "artifactIndex": 9
+                        },
+                        "point": [
+                          790,
+                          194.5
+                        ]
+                      }
+                    ],
+                    "detours": [
+                      {
+                        "relationship": {
+                          "id": "bearer-to-db-1",
+                          "from": "bearer",
+                          "to": "db",
+                          "label": "busca McpToken",
+                          "collectionIndex": 8,
+                          "artifactIndex": 9
+                        },
+                        "bends": 3,
+                        "stretch": 1
+                      }
+                    ]
+                  },
+                  "leadingSpace": {
+                    "measured": true,
+                    "emptyTopPx": 76,
+                    "emptyTopRatio": 0.131,
+                    "occupiedTop": 76,
+                    "viewBoxTop": 0,
+                    "canvasHeight": 580,
+                    "typicalNodeHeight": 60,
+                    "reviewSuggested": false
+                  },
+                  "desktopReadability": {
+                    "budgetBasis": "recognized-declared-wide",
+                    "readerContract": "declared-wide-v1",
+                    "availableDiagramWidth": 1346,
+                    "actualBudgetPx": 1346,
+                    "actualReaderWidth": 1376,
+                    "desiredReaderWidth": 1511.25,
+                    "viewportCap": 1376,
+                    "limit": "viewport-cap",
+                    "requestedTargetPx": 7.5,
+                    "requestedTargetMet": false,
+                    "hardFloorPx": 6,
+                    "hardFloorMet": true,
+                    "minimumOwner": {
+                      "kind": "edge",
+                      "id": "user-to-guard-1",
+                      "from": "user",
+                      "to": "guard"
+                    },
+                    "minimumSourceTextPx": 8,
+                    "minimumProjectedTextPx": 6.815189873417721,
+                    "semanticTextCount": 25
+                  },
+                  "issues": []
+                }
+              }
+            },
+            {
+              "id": "modelo-datos",
+              "receipt": {
+                "ok": true,
+                "file": "/tmp/archify-explainer-check-ILNveK/child.html",
+                "artifact": {
+                  "sha256": "4edb2e23e5a04f2189659665054a8a8f061e01ad15df65ea0a343124b08a04a5",
+                  "bytes": 832655
+                },
+                "checks": [
+                  {
+                    "name": "single_svg",
+                    "ok": true,
+                    "details": [
+                      "found 1 <svg> block(s)"
+                    ]
+                  },
+                  {
+                    "name": "finite_svg",
+                    "ok": true,
+                    "details": []
+                  },
+                  {
+                    "name": "orthogonal_arrows",
+                    "ok": true,
+                    "details": []
+                  },
+                  {
+                    "name": "label_route_clearance",
+                    "ok": true,
+                    "details": []
+                  },
+                  {
+                    "name": "relationship_crossings",
+                    "ok": true,
+                    "details": []
+                  },
+                  {
+                    "name": "relationship_corridors",
+                    "ok": true,
+                    "details": []
+                  },
+                  {
+                    "name": "container_border_runs",
+                    "ok": true,
+                    "details": []
+                  },
+                  {
+                    "name": "route_rhythm",
+                    "ok": true,
+                    "details": []
+                  },
+                  {
+                    "name": "legend_clearance",
+                    "ok": true,
+                    "details": []
+                  }
+                ],
+                "composition": {
+                  "schemaVersion": 1,
+                  "profile": "showcase",
+                  "status": "pass",
+                  "summary": {
+                    "errors": 0,
+                    "warnings": 0
+                  },
+                  "metrics": {
+                    "properCrossings": 0,
+                    "resolvedCrossovers": 0,
+                    "ambiguousCorridors": 0,
+                    "arrowheadCollisions": 0,
+                    "containerBorderRuns": 0,
+                    "labelRouteClearanceIssues": 0,
+                    "labelCanvasOverflowIssues": 0,
+                    "minLabelRouteClearance": 133,
+                    "desktopReadabilityIssues": 0,
+                    "viewportHeightIssues": 0,
+                    "minProjectedNodeTextPx": 7.386585365853658,
+                    "maxBends": 4,
+                    "routesOverSuggestedBends": 3,
+                    "maxStretch": 1.15,
+                    "routesOverSuggestedStretch": 0,
+                    "minSegmentPx": 24,
+                    "minInteriorSegmentPx": 35,
+                    "shortSegmentCount": 0,
+                    "shortEndpointSegmentCount": 0,
+                    "shortInteriorSegmentCount": 0,
+                    "microSegmentCount": 0
+                  },
+                  "suggestedLimits": {
+                    "bendsPerRelationship": 2,
+                    "stretch": 1.35,
+                    "segmentPx": 16,
+                    "microSegmentPx": 8
+                  },
+                  "routeReview": {
+                    "crossings": [],
+                    "detours": [
+                      {
+                        "relationship": {
+                          "id": "task-to-user-1",
+                          "from": "task",
+                          "to": "user",
+                          "label": "pertenece a",
+                          "collectionIndex": 0,
+                          "artifactIndex": 1
+                        },
+                        "bends": 3,
+                        "stretch": 1.052
+                      },
+                      {
+                        "relationship": {
+                          "id": "mcptoken-to-user-1",
+                          "from": "mcptoken",
+                          "to": "user",
+                          "label": "pertenece a",
+                          "collectionIndex": 1,
+                          "artifactIndex": 2
+                        },
+                        "bends": 4,
+                        "stretch": 1.149
+                      },
+                      {
+                        "relationship": {
+                          "id": "account-to-user-1",
+                          "from": "account",
+                          "to": "user",
+                          "label": "",
+                          "collectionIndex": 3,
+                          "artifactIndex": 4
+                        },
+                        "bends": 4,
+                        "stretch": 1.15,
+                        "directCorridorBlockers": [
+                          {
+                            "id": "session",
+                            "label": "Session",
+                            "box": [
+                              368,
+                              40,
+                              240,
+                              116
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "leadingSpace": {
+                    "measured": false,
+                    "reviewSuggested": false
+                  },
+                  "desktopReadability": {
+                    "budgetBasis": "recognized-declared-wide",
+                    "readerContract": "declared-wide-v1",
+                    "availableDiagramWidth": 1346,
+                    "actualBudgetPx": 1346,
+                    "actualReaderWidth": 1376,
+                    "desiredReaderWidth": 1396.6666666666667,
+                    "viewportCap": 1376,
+                    "limit": "viewport-cap",
+                    "requestedTargetPx": 7.5,
+                    "requestedTargetMet": false,
+                    "hardFloorPx": 6,
+                    "hardFloorMet": true,
+                    "minimumOwner": {
+                      "kind": "node",
+                      "id": "user"
+                    },
+                    "minimumSourceTextPx": 9,
+                    "minimumProjectedTextPx": 7.386585365853658,
+                    "semanticTextCount": 69
+                  },
+                  "issues": []
+                }
+              }
+            },
+            {
+              "id": "flujo-web-diagram",
+              "receipt": {
+                "ok": true,
+                "file": "/tmp/archify-explainer-check-8VhrP3/child.html",
+                "artifact": {
+                  "sha256": "32b7fcc08cba1be1c13d22006ddd6d521a2275395f84aa1575d5feed8a55a9c8",
+                  "bytes": 810628
+                },
+                "checks": [
+                  {
+                    "name": "single_svg",
+                    "ok": true,
+                    "details": [
+                      "found 1 <svg> block(s)"
+                    ]
+                  },
+                  {
+                    "name": "finite_svg",
+                    "ok": true,
+                    "details": []
+                  },
+                  {
+                    "name": "orthogonal_arrows",
+                    "ok": true,
+                    "details": []
+                  },
+                  {
+                    "name": "label_route_clearance",
+                    "ok": true,
+                    "details": []
+                  },
+                  {
+                    "name": "relationship_crossings",
+                    "ok": true,
+                    "details": []
+                  },
+                  {
+                    "name": "relationship_corridors",
+                    "ok": true,
+                    "details": []
+                  },
+                  {
+                    "name": "container_border_runs",
+                    "ok": true,
+                    "details": []
+                  },
+                  {
+                    "name": "route_rhythm",
+                    "ok": true,
+                    "details": []
+                  },
+                  {
+                    "name": "legend_clearance",
+                    "ok": true,
+                    "details": []
+                  }
+                ],
+                "composition": {
+                  "schemaVersion": 1,
+                  "profile": "showcase",
+                  "status": "pass",
+                  "summary": {
+                    "errors": 0,
+                    "warnings": 0
+                  },
+                  "metrics": {
+                    "properCrossings": 0,
+                    "resolvedCrossovers": 0,
+                    "ambiguousCorridors": 0,
+                    "arrowheadCollisions": 0,
+                    "containerBorderRuns": 0,
+                    "labelRouteClearanceIssues": 0,
+                    "labelCanvasOverflowIssues": 0,
+                    "minLabelRouteClearance": 28,
+                    "desktopReadabilityIssues": 0,
+                    "viewportHeightIssues": 0,
+                    "minProjectedNodeTextPx": 11,
+                    "maxBends": 0,
+                    "routesOverSuggestedBends": 0,
+                    "maxStretch": 1,
+                    "routesOverSuggestedStretch": 0,
+                    "minSegmentPx": 200.3,
+                    "minInteriorSegmentPx": null,
+                    "shortSegmentCount": 0,
+                    "shortEndpointSegmentCount": 0,
+                    "shortInteriorSegmentCount": 0,
+                    "microSegmentCount": 0
+                  },
+                  "suggestedLimits": {
+                    "bendsPerRelationship": 2,
+                    "stretch": 1.35,
+                    "segmentPx": 16,
+                    "microSegmentPx": 8
+                  },
+                  "routeReview": {
+                    "crossings": [],
+                    "detours": []
+                  },
+                  "leadingSpace": {
+                    "measured": false,
+                    "reviewSuggested": false
+                  },
+                  "sequenceColumnSpace": {
+                    "measured": true,
+                    "columnFit": "spread",
+                    "participantCount": 4,
+                    "occupiedRight": 880,
+                    "viewBoxLeft": 0,
+                    "canvasWidth": 920,
+                    "emptyRightPx": 40,
+                    "emptyRightRatio": 0.043,
+                    "typicalParticipantWidth": 175,
+                    "reviewSuggested": false
+                  },
+                  "desktopReadability": {
+                    "budgetBasis": "legacy-930",
+                    "readerContract": "declared-wide-v1",
+                    "availableDiagramWidth": 930,
+                    "actualBudgetPx": 930,
+                    "limit": "legacy",
+                    "requestedTargetPx": null,
+                    "requestedTargetMet": null,
+                    "hardFloorPx": 6,
+                    "hardFloorMet": true,
+                    "minimumOwner": {
+                      "kind": "edge",
+                      "id": "user-to-action-1",
+                      "from": "user",
+                      "to": "action"
+                    },
+                    "minimumSourceTextPx": 11,
+                    "minimumProjectedTextPx": 11,
+                    "semanticTextCount": 11
+                  },
+                  "issues": []
+                }
+              }
+            },
+            {
+              "id": "flujo-mcp-diagram",
+              "receipt": {
+                "ok": true,
+                "file": "/tmp/archify-explainer-check-zOZYX8/child.html",
+                "artifact": {
+                  "sha256": "afc192ee62c216552af45991b60ef81f0be79ca5df4dd5257440170d7a2353e0",
+                  "bytes": 814703
+                },
+                "checks": [
+                  {
+                    "name": "single_svg",
+                    "ok": true,
+                    "details": [
+                      "found 1 <svg> block(s)"
+                    ]
+                  },
+                  {
+                    "name": "finite_svg",
+                    "ok": true,
+                    "details": []
+                  },
+                  {
+                    "name": "orthogonal_arrows",
+                    "ok": true,
+                    "details": []
+                  },
+                  {
+                    "name": "label_route_clearance",
+                    "ok": true,
+                    "details": []
+                  },
+                  {
+                    "name": "relationship_crossings",
+                    "ok": true,
+                    "details": []
+                  },
+                  {
+                    "name": "relationship_corridors",
+                    "ok": true,
+                    "details": []
+                  },
+                  {
+                    "name": "container_border_runs",
+                    "ok": true,
+                    "details": []
+                  },
+                  {
+                    "name": "route_rhythm",
+                    "ok": true,
+                    "details": []
+                  },
+                  {
+                    "name": "legend_clearance",
+                    "ok": true,
+                    "details": []
+                  }
+                ],
+                "composition": {
+                  "schemaVersion": 1,
+                  "profile": "showcase",
+                  "status": "pass",
+                  "summary": {
+                    "errors": 0,
+                    "warnings": 0
+                  },
+                  "metrics": {
+                    "properCrossings": 0,
+                    "resolvedCrossovers": 0,
+                    "ambiguousCorridors": 0,
+                    "arrowheadCollisions": 0,
+                    "containerBorderRuns": 0,
+                    "labelRouteClearanceIssues": 0,
+                    "labelCanvasOverflowIssues": 0,
+                    "minLabelRouteClearance": 28,
+                    "desktopReadabilityIssues": 0,
+                    "viewportHeightIssues": 0,
+                    "minProjectedNodeTextPx": 8.742857142857142,
+                    "maxBends": 0,
+                    "routesOverSuggestedBends": 0,
+                    "maxStretch": 1,
+                    "routesOverSuggestedStretch": 0,
+                    "minSegmentPx": 155.2,
+                    "minInteriorSegmentPx": null,
+                    "shortSegmentCount": 0,
+                    "shortEndpointSegmentCount": 0,
+                    "shortInteriorSegmentCount": 0,
+                    "microSegmentCount": 0
+                  },
+                  "suggestedLimits": {
+                    "bendsPerRelationship": 2,
+                    "stretch": 1.35,
+                    "segmentPx": 16,
+                    "microSegmentPx": 8
+                  },
+                  "routeReview": {
+                    "crossings": [],
+                    "detours": []
+                  },
+                  "leadingSpace": {
+                    "measured": false,
+                    "reviewSuggested": false
+                  },
+                  "sequenceColumnSpace": {
+                    "measured": true,
+                    "columnFit": "spread",
+                    "participantCount": 6,
+                    "occupiedRight": 1045,
+                    "viewBoxLeft": 0,
+                    "canvasWidth": 1085,
+                    "emptyRightPx": 40,
+                    "emptyRightRatio": 0.037,
+                    "typicalParticipantWidth": 137,
+                    "reviewSuggested": false
+                  },
+                  "desktopReadability": {
+                    "budgetBasis": "legacy-930",
+                    "readerContract": "declared-wide-v1",
+                    "availableDiagramWidth": 930,
+                    "actualBudgetPx": 930,
+                    "limit": "legacy",
+                    "requestedTargetPx": null,
+                    "requestedTargetMet": null,
+                    "hardFloorPx": 6,
+                    "hardFloorMet": true,
+                    "minimumOwner": {
+                      "kind": "node",
+                      "id": "db"
+                    },
+                    "minimumSourceTextPx": 10.2,
+                    "minimumProjectedTextPx": 8.742857142857142,
+                    "semanticTextCount": 16
+                  },
+                  "issues": []
+                }
+              }
+            }
+          ]
+        },
+        "diagnostics": [],
+        "provenance": "current",
+        "deliveryReceiptId": "3bac32fb-9a25-4c5d-bef8-250fdb36cc63"
+      }
+    }
+  },
+  "browserCheck": {
+    "requested": false,
+    "ran": false
+  },
+  "diagnostics": [],
+  "evidence": {
+    "receipt": "/home/walker/Documentos/TODO-mcp/docs/arquitectura-todo-mcp.finalize.json",
+    "summaryReceipt": "/home/walker/Documentos/TODO-mcp/docs/arquitectura-todo-mcp.finalize-summary.json"
+  },
+  "visualReview": "not-requested",
+  "finishedAt": "2026-10-18T18:41:31.336Z",
+  "durationMs": 4799,
+  "update": {
+    "status": "unavailable",
+    "installedVersion": null,
+    "availableVersion": null,
+    "releaseNotes": null,
+    "checkedAt": null,
+    "source": null,
+    "noticeRequired": false,
+    "noticeText": null,
+    "reason": "timeout"
+  }
+}

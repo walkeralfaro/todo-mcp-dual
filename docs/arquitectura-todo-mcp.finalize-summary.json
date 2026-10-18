@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "ok": true,
+  "command": "finalize",
+  "status": "pass",
+  "type": "explainer",
+  "quality": "showcase",
+  "specification": {
+    "path": "/home/walker/Documentos/TODO-mcp/.archify/explainer-todo-mcp-20261018-134032/candidate.archify.md",
+    "sha256": "8e9e428f39495b97c1cf969b1711d10347b2caf73f161e95d691478834530c7a",
+    "bytes": 17778
+  },
+  "artifact": {
+    "path": "/home/walker/Documentos/TODO-mcp/docs/arquitectura-todo-mcp.html",
+    "sha256": "057f7aa381b8712247d79e2b8008447652e711a1273974e95b5d755374de58e7",
+    "bytes": 1860407
+  },
+  "gates": {
+    "validate": "pass",
+    "deliver": "pass",
+    "check": "pass",
+    "browser-check": "not-run"
+  },
+  "diagnostics": [],
+  "diagnosticSummary": {
+    "total": 0,
+    "shown": 0,
+    "truncated": false
+  },
+  "evidence": {
+    "receipt": "/home/walker/Documentos/TODO-mcp/docs/arquitectura-todo-mcp.finalize.json",
+    "summaryReceipt": "/home/walker/Documentos/TODO-mcp/docs/arquitectura-todo-mcp.finalize-summary.json"
+  },
+  "visualReview": "not-requested",
+  "durationMs": 4799,
+  "browserCheck": {
+    "requested": false,
+    "ran": false
+  }
+}
