@@ -77,7 +77,12 @@ DATABASE_URL="file:../dev.db"
   ```bash
   TURSO_DATABASE_URL="libsql://..." TURSO_AUTH_TOKEN="..." node scripts/apply-schema-turso.mjs
   ```
-3. El build ya incluye `prisma generate && next build` precedido del esquema idempotente (`--skip-if-missing`: crea la tabla si falta, no toca nada si existe); no hay paso manual de esquema.
+3. El build antepone al `prisma generate && next build` un paso de esquema **no destructivo** (`--skip-if-missing` lo omite sin credenciales Turso):
+  - crea las tablas e índices que falten (`CREATE ... IF NOT EXISTS`);
+  - añade a las tablas existentes las columnas que falten y sean opcionales o tengan `DEFAULT`, sin borrar filas;
+  - **nunca borra tablas**;
+  - si falta una columna obligatoria sin `DEFAULT` (desalineación estructural), **falla el build** nombrando la tabla y las columnas, sin tocar la DB.
+4. Si el build falla por desalineación estructural, repara esa tabla una vez (ver Troubleshooting) y vuelve a desplegar.
 
 ## Usage
 
@@ -169,7 +174,7 @@ Además, `McpToken` guarda los accesos MCP (hash SHA-256 + prefijo visible, `exp
 
 ```bash
 npm run dev       # desarrollo
-npm run build     # esquema Turso idempotente + prisma generate + next build
+npm run build     # esquema Turso aditivo y no destructivo + prisma generate + next build
 npm start         # producción
 npm run lint      # ESLint 9 con eslint-config-next (config plana) — no necesita entorno
 npm run typecheck # tsc --noEmit — no necesita entorno
@@ -178,7 +183,8 @@ npm run test:watch
 npm run test:e2e  # E2E Playwright (carga .env por sí solo; limpia tablas antes de arrancar)
 npm run db:push      # sincronizar schema SQLite local
 npm run db:migrate   # prisma migrate deploy
-node scripts/apply-schema-turso.mjs  # aplicar esquema a Turso (con TURSO_* en entorno)
+node scripts/apply-schema-turso.mjs  # esquema a Turso, no destructivo (con TURSO_* en entorno)
+node scripts/realinear-task-turso.mjs  # reparación puntual de Task desalineada (one-off)
 node scripts/clean-turso-test.mjs    # vaciar tablas de Turso-test
 ```
 
@@ -193,7 +199,7 @@ Comandos y entorno que necesita cada uno:
 | `npm test` | `TURSO_*` exportados | Vitest completo (unitarios + integración) |
 | `npm run test:e2e` | `.env` (lo carga el propio script) | Playwright E2E |
 
-- Sin Turso (mocks o funciones puras): `app/actions.test.ts`, `app/mcp/actions.test.ts`, `lib/validators.test.ts`, `lib/auth-error.test.ts`, `lib/auth-redirect.test.ts`, `components/task-item.test.tsx`, `components/ui/button.test.tsx`.
+- Sin Turso (mocks o funciones puras): `app/actions.test.ts`, `app/mcp/actions.test.ts`, `lib/validators.test.ts`, `lib/auth-error.test.ts`, `lib/auth-redirect.test.ts`, `components/task-item.test.tsx`, `components/ui/button.test.tsx`, `scripts/apply-schema-turso.test.ts` (DBs libsql `file:` temporales).
 - Integración contra Turso-test (helper `lib/test-db.ts`, limpieza por tablas): `lib/tasks.test.ts`, `lib/mcp.test.ts`, `lib/mcp-tokens.test.ts`, `app/api/[transport]/route.test.ts` (esta última cubre `tools/list`, `tools/call` y los errores de validación por la ruta real).
 - E2E (`e2e/`): `landing.spec.ts`, `todo.spec.ts`, `todo-auth.spec.ts`, `proteccion.spec.ts`, `mcp-tokens.spec.ts`, `titular.spec.ts`, `nav-movil.spec.ts` — contra Turso-test; `playwright.config.ts` limpia las tablas y levanta el server antes de arrancar.
 
@@ -237,6 +243,7 @@ openspec/ requirement.md AGENTS.md
 - `DATABASE_URL` no encontrada: copia `.env.example` a `.env`, default `file:../dev.db` en `lib/db.ts:16`.
 - DB vacía / schema desactualizado (local): `npx prisma db push`.
 - `P1012 the URL must start with file:` al apuntar a Turso: esperado, el CLI no soporta `libsql://`. Usa `node scripts/apply-schema-turso.mjs` con `TURSO_*` en entorno.
+- Build falla con "Desalineacion estructural ... falta ...": la tabla existe con columnas distintas al esquema y no se puede alinear sin borrar datos. Repara esa tabla una vez (`TURSO_DATABASE_URL=... TURSO_AUTH_TOKEN=... node scripts/realinear-task-turso.mjs`, añade `--accept-loss` si tiene filas y aceptas perderlas) y vuelve a desplegar. El build nunca borra tablas por su cuenta.
 - Tests contra Turso fallan con "faltan TURSO_*": Vitest no lee `.env` solo; lanza `set -a; source .env` antes de `npm test`. `npm run test:e2e` sí lo carga por su cuenta.
 - Timeout de conexión contra Turso (`ConnectTimeoutError` / `fetch failed`): fallo de red del entorno hacia `*.turso.io`, no del test. Reintenta el comando; el resto de la suite sigue en verde.
 - E2E falla por puerto ocupado: Playwright usa `reuseExistingServer: false`, cierra `npm run dev` en puerto 3000 antes de `npm run test:e2e`.
