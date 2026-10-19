@@ -3,10 +3,18 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Menu, Network, X } from "lucide-react";
+import { ChevronDownIcon, Menu, Network, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { authClient } from "@/lib/auth-client";
 import { AuthModal, type AuthTab } from "@/components/ui-auth/auth-modal";
+import { shortDisplayName } from "@/lib/user-display-name";
 import { cn } from "@/lib/utils";
 
 /**
@@ -47,12 +55,60 @@ function SignOutButton({
 }
 
 /**
+ * Avatar del usuario (imagen de OAuth o iniciales). Se monta dos veces: dentro
+ * del disparador del menú de escritorio (decorativo, con `decorative`) y suelto
+ * en la barra móvil. Cada instancia lleva su propio `data-testid` para que los
+ * selectores de prueba no resuelvan a dos elementos a la vez.
+ */
+function UserAvatar({
+  testId,
+  imageSrc,
+  name,
+  initials,
+  className,
+  decorative = false,
+}: {
+  testId: string;
+  imageSrc: string | undefined;
+  name: string;
+  initials: string;
+  className?: string;
+  decorative?: boolean;
+}): React.JSX.Element {
+  return (
+    <span
+      data-testid={testId}
+      aria-hidden={decorative || undefined}
+      className={cn(
+        "flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-full border border-ink/15 bg-surface text-[13px] font-medium text-ink",
+        className,
+      )}
+    >
+      {imageSrc ? (
+        // Avatar externo de OAuth: <img> es suficiente y evita configurar
+        // dominios remotos en next/image (excepción aceptada en la auditoría
+        // de calidad).
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={imageSrc}
+          alt={`Avatar de ${name}`}
+          className="size-full object-cover"
+        />
+      ) : (
+        initials
+      )}
+    </span>
+  );
+}
+
+/**
  * Navbar compartida de la landing y de la app.
  * - Sin sesión: "Iniciar sesión" y "Registrarse" (modal de cuenta único).
- * - Con sesión: avatar + nombre, enlaces "Mis tareas"/"Tokens MCP" y
- *   "Cerrar sesión", que vuelve a la landing en estado anónimo. En móvil el
- *   avatar queda en la barra con la hamburguesa a su derecha y "Cerrar sesión"
- *   se despliega dentro del panel `#mobile-nav`.
+ * - Con sesión: "Mis tareas" y el enlace a la documentación en la barra; el
+ *   avatar + nombre abren el menú de usuario de escritorio, que contiene
+ *   "Tokens MCP" y "Cerrar sesión" (vuelve a la landing en estado anónimo).
+ *   En móvil el avatar queda en la barra con la hamburguesa a su derecha y las
+ *   mismas acciones se despliegan dentro del panel `#mobile-nav`.
  */
 export function SiteHeader(): React.JSX.Element {
   const { data: session } = authClient.useSession();
@@ -65,6 +121,9 @@ export function SiteHeader(): React.JSX.Element {
   // Navegación de sesión en móvil (<640px), donde los enlaces no caben
   // visibles junto al avatar y "Cerrar sesión".
   const [navOpen, setNavOpen] = useState(false);
+  // Menú de usuario de escritorio (≥640px): contiene "Tokens MCP" y el cierre
+  // de sesión. Es controlado para poder mantenerlo abierto si el cierre falla.
+  const [menuOpen, setMenuOpen] = useState(false);
   const navToggleWrapperRef = useRef<HTMLDivElement>(null);
   const headerRef = useRef<HTMLElement>(null);
 
@@ -113,6 +172,7 @@ export function SiteHeader(): React.JSX.Element {
       }
       setModalOpen(false);
       setNavOpen(false);
+      setMenuOpen(false);
       // Vuelve a la landing: las rutas protegidas redirigen igualmente sin
       // sesión. Si ya estamos en "/", basta refrescar (push + refresh
       // seguidos pueden abortar la navegación).
@@ -174,74 +234,96 @@ export function SiteHeader(): React.JSX.Element {
             className="hidden items-center gap-1 sm:flex"
           >
             {user && (
-              <>
-                <Link
-                  href="/tareas"
-                  data-testid="nav-tareas"
-                  aria-current={pathname === "/tareas" ? "page" : undefined}
-                  className={linkClass("/tareas")}
-                >
-                  Mis tareas
-                </Link>
-                <Link
-                  href="/mcp"
-                  data-testid="nav-mcp"
-                  aria-current={pathname === "/mcp" ? "page" : undefined}
-                  className={linkClass("/mcp")}
-                >
-                  Tokens MCP
-                </Link>
-              </>
+              <Link
+                href="/tareas"
+                data-testid="nav-tareas"
+                aria-current={pathname === "/tareas" ? "page" : undefined}
+                className={linkClass("/tareas")}
+              >
+                Mis tareas
+              </Link>
             )}
           </nav>
 
           {user ? (
             <div className="flex items-center gap-2">
-              <div className="flex items-center gap-2">
-                <div
-                  data-testid="auth-avatar"
-                  className="flex size-8 items-center justify-center overflow-hidden rounded-full border border-ink/15 bg-surface text-[13px] font-medium text-ink"
-                >
-                  {imageSrc ? (
-                    // Avatar externo de OAuth: <img> es suficiente y evita
-                    // configurar dominios remotos en next/image (excepción
-                    // aceptada en la auditoría de calidad).
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={imageSrc}
-                      alt={`Avatar de ${user.name ?? "usuario"}`}
-                      className="size-full object-cover"
-                    />
-                  ) : (
-                    initials
-                  )}
-                </div>
-                <span
-                  data-testid="auth-user-name"
-                  className="hidden max-w-[16ch] truncate text-[13px] font-medium text-ink md:inline"
-                >
-                  {user.name ?? user.email ?? "Usuario"}
-                </span>
-              </div>
-              {signOutError && (
-                <span
-                  role="alert"
-                  className="hidden text-[12px] text-destructive sm:inline"
-                >
-                  {signOutError}
-                </span>
-              )}
-              {/* Solo desde `sm`: en móvil el cierre de sesión vive en el
-                  panel `#mobile-nav` y el envoltorio oculto evita que el botón
-                  sea visible o enfocable con el teclado. */}
+              {/* Menú de usuario (escritorio, ≥640 px). Por debajo de `sm` el
+                  disparador no se monta y las mismas acciones viven en el
+                  panel `#mobile-nav`. */}
               <div className="hidden sm:flex">
-                <SignOutButton
-                  testId="auth-signout-btn"
-                  disabled={signingOut}
-                  busy={signingOut}
-                  onClick={handleSignOut}
-                />
+                <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
+                  <DropdownMenuTrigger
+                    data-testid="auth-user-menu-btn"
+                    aria-haspopup="menu"
+                    aria-expanded={menuOpen}
+                    aria-controls="user-menu"
+                    className="inline-flex h-11 min-w-11 items-center gap-2 rounded-md px-2 text-[15px] text-ink transition-colors duration-150 hover:bg-elevated"
+                  >
+                    <UserAvatar
+                      testId="auth-avatar-menu"
+                      imageSrc={imageSrc}
+                      name={user.name ?? "usuario"}
+                      initials={initials}
+                      decorative
+                    />
+                    <span
+                      data-testid="auth-user-name"
+                      className="hidden max-w-[10ch] truncate text-[13px] font-medium text-ink md:inline"
+                    >
+                      {shortDisplayName(user.name, user.email ?? "Usuario")}
+                    </span>
+                    <ChevronDownIcon
+                      aria-hidden="true"
+                      className="size-4 text-muted"
+                    />
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent id="user-menu" align="end">
+                    <DropdownMenuItem asChild className="min-h-11">
+                      <Link href="/mcp" data-testid="nav-mcp">
+                        <Network
+                          aria-hidden="true"
+                          className="size-4 text-muted"
+                        />
+                        Tokens MCP
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    {signOutError && (
+                      <p
+                        role="alert"
+                        className="px-2 py-1 text-[12px] text-destructive"
+                      >
+                        {signOutError}
+                      </p>
+                    )}
+                    <DropdownMenuItem
+                      variant="destructive"
+                      data-testid="auth-signout-btn"
+                      className="min-h-11"
+                      disabled={signingOut}
+                      aria-busy={signingOut}
+                      onSelect={(event) => {
+                        // Sin `preventDefault` Radix cerraría el menú y el
+                        // error de cierre de sesión quedaría oculto.
+                        event.preventDefault();
+                        void handleSignOut();
+                      }}
+                    >
+                      {signingOut ? "Cerrando sesión…" : "Cerrar sesión"}
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
+
+              {/* Avatar de la barra por debajo de `sm`, donde el disparador del
+                  menú no se monta. */}
+              <UserAvatar
+                testId="auth-avatar"
+                imageSrc={imageSrc}
+                name={user.name ?? "usuario"}
+                initials={initials}
+                className="sm:hidden"
+              />
             </div>
           ) : (
             <div className="flex items-center gap-2">
@@ -285,12 +367,13 @@ export function SiteHeader(): React.JSX.Element {
 
           {/* Enlace secundario: explica cómo está construida la app. Apunta al
               documento estático publicado en `/arquitectura` y lo abre en otra
-              pestaña para no perder la demo. Se oculta por debajo de `sm`,
-              donde el header no tiene espacio: en móvil con sesión vive en el
-              panel `#mobile-nav` y, sin sesión, en el pie de la landing.
-              Entre `sm` y `lg` va solo con icono (con `aria-label`): la
-              etiqueta no cabe junto a los enlaces de sesión sin partir el
-              resto de controles en varias líneas. */}
+              pestaña para no perder la demo. Va destacado con el color de
+              acento (chip translúcido) para distinguirse del resto de enlaces.
+              Se oculta por debajo de `sm`, donde el header no tiene espacio: en
+              móvil con sesión vive en el panel `#mobile-nav` y, sin sesión, en
+              el pie de la landing. Entre `sm` y `lg` va solo con icono (con
+              `aria-label`): la etiqueta no cabe junto a los enlaces de sesión
+              sin partir el resto de controles en varias líneas. */}
           <a
             href="/arquitectura"
             target="_blank"
@@ -298,7 +381,7 @@ export function SiteHeader(): React.JSX.Element {
             data-testid="nav-arquitectura"
             aria-label="Cómo está hecha"
             title="Cómo está hecha"
-            className="hidden h-11 min-w-11 items-center gap-2 rounded-md px-3 text-[15px] text-muted transition-colors duration-150 hover:bg-elevated hover:text-ink sm:inline-flex"
+            className="hidden h-11 min-w-11 items-center gap-2 rounded-md border border-accent/25 bg-accent/10 px-3 text-[15px] font-medium text-accent transition-colors duration-150 hover:bg-accent/20 hover:text-accent sm:inline-flex"
           >
             <Network aria-hidden="true" className="size-4" />
             <span className="hidden lg:inline">Cómo está hecha</span>

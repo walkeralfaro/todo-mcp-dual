@@ -56,7 +56,7 @@ El esquema también incluye las entidades de autenticación de Better Auth (`Use
    - Landing pública en `/` (presentación del producto y punto de acceso).
    - La aplicación de tareas vive en `/tareas`: exige sesión y, sin ella, redirige a `/?auth=login&next=<ruta>` conservando la ruta pedida para volver tras autenticarse.
    - Página de tokens MCP en `/mcp`, también protegida.
-   - Navbar compartida en todas las rutas con el estado de sesión (iniciar sesión, registrarse y cerrar sesión).
+   - Navbar compartida en todas las rutas con el estado de sesión (iniciar sesión, registrarse y cerrar sesión). Sin sesión muestra "Iniciar sesión" y "Registrarse"; con sesión, el header de escritorio (≥640 px) agrupa la identidad del usuario —avatar y primer nombre, recortado a 10 caracteres— en un menú desplegable que contiene "Tokens MCP" y "Cerrar sesión", dejando la barra con la marca, "Mis tareas", el disparador del menú y el enlace "Cómo está hecha". Por debajo de 640 px las mismas acciones viven en el panel de navegación móvil `#mobile-nav`, sin cambios.
    - Pie de página global en las rutas del layout (`/`, `/tareas` y `/mcp`) con el crédito "developed with ❤️ by walker alfaro", anclado al borde inferior del viewport con contenido corto y al final del documento cuando hay scroll.
 5. **Tokens MCP:**
    - Generación bajo demanda en `/mcp` (solo con sesión): valor en claro `tmcp_…` mostrado una única vez; se persisten el hash SHA-256 (`mcp_token.token`) y el prefijo visible (`tokenPrefix`).
