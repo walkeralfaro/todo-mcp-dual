@@ -1,32 +1,46 @@
 schema: spec-driven
 
-# Project context (optional)
-# Add only constraints that should guide OpenSpec artifacts and workflows.
-# Include constraints an agent cannot infer by reading the code.
-# Keep general project documentation and discoverable codebase facts out.
-# Example:
-#   context: |
-#     Designs and tasks must cover Windows, macOS, and Linux
-#     Write all artifacts in Spanish
+# Contexto del proyecto: se inyecta en las instrucciones de todos los artefactos.
+# Incluye solo restricciones que un agente no pueda inferir leyendo el código.
+context: |
+  Escribe todos los artefactos (proposal, design, specs, tasks) en español.
 
-# Per-artifact rules (optional)
-# Add custom rules for specific artifacts.
-# Example:
-#   rules:
-#     proposal:
-#       - Keep proposals under 500 words
-#       - Always state what is out of scope
-#     tasks:
-#       - Break tasks into chunks of max 2 hours
+  El inventario de capacidades es CERRADO. Son exactamente estas seis, cada una
+  con su carpeta en `openspec/specs/`:
+    - todo-tasks  · dominio de tareas: modelo, ciclo de vida, validación, aislamiento por usuario y semántica de listado/filtro/búsqueda
+    - task-ui     · pantalla /tareas y sistema de UI (formulario, listado, filtros, titular, componentes, tipografía, color, movimiento)
+    - identity    · autenticación, sesión, rutas protegidas y navbar
+    - mcp         · servidor MCP (/api/mcp) y ciclo de vida de los tokens de acceso
+    - public-site · landing pública, pie de página global y documentación de arquitectura
+    - platform    · entornos Turso (test/prod), esquema en deploy y secretos
 
-# Per-operation guidance (optional)
-# Add advisory guidance for how apply and archive work should be conducted.
-# This is separate from artifact rules above.
-# Example:
-#   operations:
-#     apply:
-#       guidance:
-#         - Keep test summaries concise
-#     archive:
-#       guidance:
-#         - Summarize the archive outcome before finishing
+  No crees una capacidad nueva por cada change: modifica la capacidad existente
+  que ya cubre el comportamiento. Una capacidad nueva solo se justifica cuando
+  el comportamiento no encaja en ninguna de las seis, y esa justificación debe
+  quedar escrita en el proposal.
+
+  `docs/especificaciones.md` es un índice generado a partir de
+  `openspec/specs/` (se regenera con `npm run specs:doc`, incluido en
+  `predev`/`prebuild`): no lo edites a mano.
+
+# Reglas por artefacto (se suman a las de la plantilla spec-driven).
+rules:
+  specs:
+    - Reutiliza una capacidad existente de la lista cerrada siempre que cubra el comportamiento; crear una carpeta nueva exige justificación explícita en el proposal.
+    - Usa la ruta de capacidad existente tal cual (`openspec/specs/<capacidad>/spec.md`); no renombres ni muevas capacidades dentro de un change.
+    - Un requisito describe una sola conducta; si cubre dos o más independientes, divídelo en requisitos separados con sus propios escenarios.
+    - Mantén la descripción de cada requisito en 500 caracteres o menos y mueve ejemplos y casos límite a los escenarios.
+    - Especifica en español todos los textos y mensajes de error dirigidos al usuario.
+  proposal:
+    - Deja explícito qué queda fuera de alcance.
+  tasks:
+    - Cada tarea indica cómo se verifica (comando, test o comportamiento observable).
+
+# Guía por operación (separa apply/archive del contenido de los artefactos).
+operations:
+  apply:
+    guidance:
+      - Al tocar especificaciones, ejecuta `npx openspec validate --specs --strict` y regenera `docs/especificaciones.md` con `npm run specs:doc`.
+  archive:
+    guidance:
+      - Si el change solo reordena o renombra el árbol de specs sin cambiar comportamiento, declara `skip_specs: true` y no añadas deltas.

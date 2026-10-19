@@ -725,7 +725,7 @@ Tipografía: **Albert Sans** (`next/font/google`), cuerpo 17–19px en tinta ple
 | Vercel Production/Preview | Turso **prod** | Variables del dashboard |
 
 Regla estricta: **los tests nunca tocan prod**; Vercel usa solo credenciales de
-prod (`openspec/specs/turso-environments/spec.md`).
+prod (`openspec/specs/platform/spec.md`).
 
 ### 18.2 Esquema en Turso (`scripts/apply-schema-turso.mjs`)
 
@@ -880,20 +880,24 @@ Agente usa el token → /api/mcp → resuelve al userId propietario
 El repositorio usa el flujo **spec-driven** de OpenSpec (`openspec/`):
 
 - `openspec/specs/<capacidad>/spec.md`: especificación vigente con requisitos
-  (`SHALL`) y escenarios (`WHEN/THEN`). Capacidades actuales:
-  `landing-page`, `mcp-tasks`, `mcp-tokens`, `todo-tasks`, `turso-environments`,
-  `user-auth`, `user-auth-ui`.
+  (`SHALL`) y escenarios (`WHEN/THEN`). El inventario es cerrado y tiene seis
+  capacidades: `todo-tasks` (dominio), `task-ui` (pantalla `/tareas`),
+  `identity` (auth y sesión), `mcp` (servidor MCP y tokens), `public-site`
+  (landing, pie y documentación) y `platform` (entornos Turso).
 - `openspec/changes/archive/<fecha>-<cambio>/`: cambios archivados con
   `proposal.md`, `design.md`, `tasks.md` y deltas en `specs/`.
-- `openspec/config.yaml`: `schema: spec-driven`.
+- `openspec/config.yaml`: `schema: spec-driven`, contexto e inventario cerrado
+  de capacidades.
+- `docs/especificaciones.md`: índice legible generado desde las capacidades
+  (`npm run specs:doc`, incluido en `predev`/`prebuild`).
 
 `AGENTS.md` obliga a: consultar/actualizar `requirement.md`, definir la spec del
 cambio, mantener `tasks.md` atómico y validar con
 `openspec validate <cambio> --strict` antes de cerrar.
 
-Las specs son **contratos verificables**: por ejemplo, `mcp-tasks` exige que el
-`userId` salga del token (`spec.md:10`), `todo-tasks` exige el titular
-independiente del filtro (`spec.md:116`), y `mcp-tokens` exige visualización
+Las specs son **contratos verificables**: por ejemplo, `mcp` exige que el
+`userId` salga del token (`spec.md:10`), `task-ui` exige el titular
+independiente del filtro, y `mcp` exige visualización
 única y hash SHA-256 (`spec.md:9`). El código implementa exactamente esos
 contratos y los tests los comprueban.
 

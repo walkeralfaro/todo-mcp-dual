@@ -85,3 +85,5 @@ El agente de desarrollo encargado deberá generar y mantener actualizados los si
 1. `spec.md`: Especificación técnica detallada y criterios de aceptación.
 2. `plan.md`: Plan de implementación arquitectónica paso a paso.
 3. `tasks.md`: Lista granular de tareas atómicas y ejecutables.
+
+Las especificaciones vigentes se organizan en seis capacidades (`openspec/specs/<capacidad>/spec.md`) y se leen consolidadas en `docs/especificaciones.md`, un índice generado con `npm run specs:doc`. El inventario de capacidades es cerrado y está definido en `openspec/config.yaml`.

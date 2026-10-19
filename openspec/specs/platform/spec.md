@@ -1,8 +1,10 @@
-# turso-environments Specification
+# platform Specification
 
 ## Purpose
 
-Permite ejecutar pruebas y producción contra Turso remoto con entornos separados (test vs prod), partiendo de esquema vacío y con aislamiento por limpieza de tablas.
+Permite ejecutar pruebas y producción contra Turso remoto con entornos
+separados (test vs prod), partiendo de esquema vacío y con aislamiento por
+limpieza de tablas.
 
 ## Requirements
 

@@ -1,0 +1,9 @@
+schema: spec-driven
+created: 2026-10-19
+goal: Consolidar el árbol de especificaciones en capacidades por dominio y publicar un índice legible generado.
+affected_areas:
+  - openspec/specs
+  - openspec/config.yaml
+  - scripts
+  - docs
+skip_specs: true
