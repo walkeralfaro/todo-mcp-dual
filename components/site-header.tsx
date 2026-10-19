@@ -10,10 +10,49 @@ import { AuthModal, type AuthTab } from "@/components/ui-auth/auth-modal";
 import { cn } from "@/lib/utils";
 
 /**
+ * Botón de cierre de sesión reutilizado por la barra (escritorio) y por el
+ * panel móvil. Recibe el estado de `SiteHeader` para que el texto pendiente y
+ * `aria-busy` se mantengan sincronizados en ambas ubicaciones.
+ */
+function SignOutButton({
+  testId,
+  className,
+  disabled,
+  busy,
+  onClick,
+}: {
+  testId: string;
+  className?: string;
+  disabled: boolean;
+  busy: boolean;
+  onClick: () => void;
+}): React.JSX.Element {
+  return (
+    <Button
+      type="button"
+      data-testid={testId}
+      variant="ghost"
+      size="sm"
+      className={cn(
+        "h-11 min-w-11 px-3 text-[13px] text-destructive hover:bg-destructive/10",
+        className,
+      )}
+      disabled={disabled}
+      aria-busy={busy}
+      onClick={onClick}
+    >
+      {busy ? "Cerrando sesión…" : "Cerrar sesión"}
+    </Button>
+  );
+}
+
+/**
  * Navbar compartida de la landing y de la app.
  * - Sin sesión: "Iniciar sesión" y "Registrarse" (modal de cuenta único).
  * - Con sesión: avatar + nombre, enlaces "Mis tareas"/"Tokens MCP" y
- *   "Cerrar sesión", que vuelve a la landing en estado anónimo.
+ *   "Cerrar sesión", que vuelve a la landing en estado anónimo. En móvil el
+ *   avatar queda en la barra con la hamburguesa a su derecha y "Cerrar sesión"
+ *   se despliega dentro del panel `#mobile-nav`.
  */
 export function SiteHeader(): React.JSX.Element {
   const { data: session } = authClient.useSession();
@@ -156,24 +195,6 @@ export function SiteHeader(): React.JSX.Element {
             )}
           </nav>
 
-          {user && (
-            <div ref={navToggleWrapperRef} className="sm:hidden">
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                data-testid="nav-menu-btn"
-                aria-label={navOpen ? "Cerrar navegación" : "Abrir navegación"}
-                aria-expanded={navOpen}
-                aria-controls="mobile-nav"
-                className="size-11"
-                onClick={() => setNavOpen((open) => !open)}
-              >
-                {navOpen ? <X aria-hidden="true" /> : <Menu aria-hidden="true" />}
-              </Button>
-            </div>
-          )}
-
           {user ? (
             <div className="flex items-center gap-2">
               <div className="flex items-center gap-2">
@@ -203,21 +224,24 @@ export function SiteHeader(): React.JSX.Element {
                 </span>
               </div>
               {signOutError && (
-                <span role="alert" className="text-[12px] text-destructive">
+                <span
+                  role="alert"
+                  className="hidden text-[12px] text-destructive sm:inline"
+                >
                   {signOutError}
                 </span>
               )}
-              <Button
-                data-testid="auth-signout-btn"
-                variant="ghost"
-                size="sm"
-                className="h-11 min-w-11 px-3 text-[13px] text-destructive hover:bg-destructive/10"
-                disabled={signingOut}
-                aria-busy={signingOut}
-                onClick={handleSignOut}
-              >
-                {signingOut ? "Cerrando sesión…" : "Cerrar sesión"}
-              </Button>
+              {/* Solo desde `sm`: en móvil el cierre de sesión vive en el
+                  panel `#mobile-nav` y el envoltorio oculto evita que el botón
+                  sea visible o enfocable con el teclado. */}
+              <div className="hidden sm:flex">
+                <SignOutButton
+                  testId="auth-signout-btn"
+                  disabled={signingOut}
+                  busy={signingOut}
+                  onClick={handleSignOut}
+                />
+              </div>
             </div>
           ) : (
             <div className="flex items-center gap-2">
@@ -237,6 +261,24 @@ export function SiteHeader(): React.JSX.Element {
                 onClick={() => openModal("register")}
               >
                 Registrarse
+              </Button>
+            </div>
+          )}
+
+          {user && (
+            <div ref={navToggleWrapperRef} className="sm:hidden">
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                data-testid="nav-menu-btn"
+                aria-label={navOpen ? "Cerrar navegación" : "Abrir navegación"}
+                aria-expanded={navOpen}
+                aria-controls="mobile-nav"
+                className="size-11"
+                onClick={() => setNavOpen((open) => !open)}
+              >
+                {navOpen ? <X aria-hidden="true" /> : <Menu aria-hidden="true" />}
               </Button>
             </div>
           )}
@@ -300,6 +342,22 @@ export function SiteHeader(): React.JSX.Element {
             <Network aria-hidden="true" className="size-4" />
             Cómo está hecha
           </a>
+          {/* Cierre de sesión en móvil: separado de la navegación y con el
+              error junto a la acción que lo provocó. */}
+          <div className="mt-2 border-t border-ink/10 pt-2">
+            {signOutError && (
+              <p role="alert" className="px-3 pb-2 text-[12px] text-destructive">
+                {signOutError}
+              </p>
+            )}
+            <SignOutButton
+              testId="auth-signout-btn-movil"
+              disabled={signingOut}
+              busy={signingOut}
+              onClick={handleSignOut}
+              className="w-full justify-start"
+            />
+          </div>
         </nav>
       )}
 

@@ -42,7 +42,7 @@ export default async function Tareas({
   ]);
 
   return (
-    <div className="mx-auto flex w-full max-w-[1024px] flex-1 flex-col gap-8 px-5 py-8 lg:grid lg:min-h-0 lg:grid-cols-[minmax(0,1fr)_340px] lg:grid-rows-[auto_auto_minmax(0,1fr)_auto] lg:gap-x-10 lg:gap-y-6 lg:overflow-hidden lg:py-10">
+    <div className="mx-auto flex w-full max-w-[1024px] flex-1 flex-col gap-8 px-5 py-8 lg:grid lg:min-h-0 lg:grid-cols-[minmax(0,1fr)_340px] lg:grid-rows-[auto_auto_minmax(0,1fr)] lg:gap-x-10 lg:gap-y-6 lg:overflow-hidden lg:py-10">
       <header className="order-1 lg:col-start-1 lg:row-start-1">
         <DayHeadline pendientes={pendientes} />
         <p className="mt-3 text-[17px] leading-[1.5] text-muted">
@@ -72,9 +72,6 @@ export default async function Tareas({
           <p className="text-[15px] text-muted">No hay tareas. Crea la primera.</p>
         )}
       </section>
-      <footer className="order-5 lg:col-start-1 lg:col-end-3 lg:row-start-4">
-        <p className="text-[13px] text-muted">Todo App · UI y MCP sobre la misma base.</p>
-      </footer>
     </div>
   );
 }

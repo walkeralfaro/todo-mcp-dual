@@ -39,7 +39,7 @@ const ENLACES_PAGINA = [
 /** Enlaces breves al contenido y las rutas reales del producto. */
 export function LandingFooter(): React.JSX.Element {
   return (
-    <footer className="border-t border-ink/10 pb-2 pt-7">
+    <div className="border-t border-ink/10 pb-2 pt-7">
       <nav
         aria-label="Mapa del sitio"
         className="flex flex-col justify-between gap-6 sm:flex-row sm:items-center"
@@ -87,7 +87,6 @@ export function LandingFooter(): React.JSX.Element {
           </li>
         </ul>
       </nav>
-      <p className="mt-4 text-[12px] text-muted">© 2026 Todo App</p>
-    </footer>
+    </div>
   );
 }

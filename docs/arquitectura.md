@@ -379,10 +379,15 @@ Vive en el layout raíz, así que aparece en landing y app:
   que abren el modal en la pestaña correcta.
 - **Con sesión**: avatar (imagen de Google o iniciales), nombre, enlaces
   "Mis tareas" (`/tareas`, `data-testid="nav-tareas"`) y "Tokens MCP"
-  (`/mcp`, `nav-mcp`), y "Cerrar sesión".
-- **Móvil (<640px)**: los enlaces se despliegan en un panel (`#mobile-nav`)
-  controlado por `nav-menu-btn`; se cierra con Escape (devolviendo el foco al
-  botón), con clic fuera del header, o al navegar.
+  (`/mcp`, `nav-mcp`), y "Cerrar sesión" (`auth-signout-btn`, visible desde
+  `sm`).
+- **Móvil (<640px)**: la barra muestra el avatar y, a su derecha, el botón
+  `nav-menu-btn`. Los enlaces y "Cerrar sesión" (`auth-signout-btn-movil`) se
+  despliegan en el panel `#mobile-nav`; el cierre de sesión va al final,
+  separado con un borde y a ancho completo. El panel se cierra con Escape
+  (devolviendo el foco al botón), con clic fuera del header, o al navegar. Si
+  el cierre de sesión falla, el panel permanece abierto y muestra el error
+  junto a la acción.
 - `data-testid` estables y áreas táctiles de 44px (`h-11 min-w-11`).
 - Todos los botones usan el componente `Button` de shadcn.
 

@@ -32,6 +32,7 @@ test("en móvil los enlaces de sesión son alcanzables desde la navbar sin recor
 
   const toggle = page.getByTestId("nav-menu-btn");
   const panel = page.locator("#mobile-nav");
+  const signOutMovil = page.getByTestId("auth-signout-btn-movil");
   const sinDesbordamiento = async () => {
     const { scrollWidth, innerWidth } = await page.evaluate(() => ({
       scrollWidth: document.documentElement.scrollWidth,
@@ -47,7 +48,21 @@ test("en móvil los enlaces de sesión son alcanzables desde la navbar sin recor
   await expect(panel).toBeHidden();
   await sinDesbordamiento();
 
-  // Abierto: ambos enlaces visibles, con área táctil y sin desbordar.
+  // La hamburguesa queda a la derecha del avatar y "Cerrar sesión" no está en
+  // la barra (su ubicación móvil es el panel).
+  const avatar = page.getByTestId("auth-avatar");
+  const avatarBounds = await avatar.boundingBox();
+  const toggleBounds = await toggle.boundingBox();
+  expect(avatarBounds).not.toBeNull();
+  expect(toggleBounds).not.toBeNull();
+  expect(toggleBounds!.x).toBeGreaterThanOrEqual(
+    avatarBounds!.x + avatarBounds!.width,
+  );
+  await expect(page.getByTestId("auth-signout-btn")).toBeHidden();
+  await expect(signOutMovil).toBeHidden();
+
+  // Abierto: enlaces y cierre de sesión visibles, con área táctil y sin
+  // desbordar.
   await toggle.click();
   await expect(toggle).toHaveAttribute("aria-expanded", "true");
   const tareas = panel.getByRole("link", { name: "Mis tareas" });
@@ -56,6 +71,9 @@ test("en móvil los enlaces de sesión son alcanzables desde la navbar sin recor
   await expect(mcp).toBeVisible();
   await expectMinHitArea(tareas);
   await expectMinHitArea(mcp);
+  await expect(signOutMovil).toBeVisible();
+  await expect(signOutMovil).toHaveText("Cerrar sesión");
+  await expectMinHitArea(signOutMovil);
   await sinDesbordamiento();
 
   // Escape cierra el panel y devuelve el foco al botón que lo abrió.
@@ -63,6 +81,17 @@ test("en móvil los enlaces de sesión son alcanzables desde la navbar sin recor
   await expect(panel).toBeHidden();
   await expect(toggle).toHaveAttribute("aria-expanded", "false");
   await expect(toggle).toBeFocused();
+  await expect(signOutMovil).toBeHidden();
+
+  // Pulsar fuera del header también cierra el panel.
+  await toggle.click();
+  await expect(panel).toBeVisible();
+  await page.evaluate(() => {
+    document.body.dispatchEvent(
+      new PointerEvent("pointerdown", { bubbles: true }),
+    );
+  });
+  await expect(panel).toBeHidden();
 
   // Cada enlace navega y deja el panel cerrado.
   await toggle.click();
@@ -74,6 +103,17 @@ test("en móvil los enlaces de sesión son alcanzables desde la navbar sin recor
   await mcp.click();
   await expect(page).toHaveURL(/\/mcp$/);
   await expect(panel).toBeHidden();
+
+  // Cerrar sesión desde el panel vuelve a la landing en estado anónimo y el
+  // panel desaparece con la sesión.
+  await toggle.click();
+  await expect(signOutMovil).toBeVisible();
+  await signOutMovil.click();
+  await expect(page).toHaveURL(/localhost:3000\/$/, { timeout: 45000 });
+  await expect(page.getByTestId("landing-login")).toBeVisible({
+    timeout: 30000,
+  });
+  await expect(panel).toHaveCount(0);
 });
 
 test("en escritorio la navbar muestra los enlaces sin depender del menú móvil", async ({

@@ -52,10 +52,14 @@ test("flujo de autenticación: registro desde la landing entra a /tareas, permit
   await expect(page.getByText(taskTitle)).toBeVisible({ timeout: 30000 });
 
   await page.setViewportSize({ width: 390, height: 844 });
-  await expectMinHitArea(page.getByTestId("auth-signout-btn"));
+  // En móvil el cierre de sesión vive en el panel desplegable, no en la barra.
+  await page.getByTestId("nav-menu-btn").click();
+  const signOutMovil = page.getByTestId("auth-signout-btn-movil");
+  await expect(signOutMovil).toBeVisible();
+  await expectMinHitArea(signOutMovil);
 
   // Cierra sesión: vuelve a la landing en estado anónimo
-  await page.getByTestId("auth-signout-btn").click();
+  await signOutMovil.click();
   await expect(page).toHaveURL(/localhost:3000\/$/, { timeout: 45000 });
   await expect(page.getByTestId("landing-login")).toBeVisible({ timeout: 30000 });
   await expect(page.getByTestId("new-title")).toBeHidden();

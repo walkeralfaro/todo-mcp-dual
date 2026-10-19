@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Albert_Sans } from "next/font/google";
 import { SiteHeader } from "@/components/site-header";
+import { SiteFooter } from "@/components/site-footer";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -38,6 +39,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           {/* Sin contenedor: cada página decide su ancho (la landing puede
               necesitar campos a sangre completa). */}
           <main className="flex w-full flex-1 flex-col lg:min-h-0">{children}</main>
+          <SiteFooter />
         </div>
       </body>
     </html>

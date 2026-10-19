@@ -30,11 +30,14 @@ Antes de escribir código o implementar nuevas funcionalidades, asegúrate de se
 
 ---
 
-## 4. Protocolo de Testing (Calidad Requerida)
-Ninguna funcionalidad se considerará terminada si no incluye su respectiva cobertura de pruebas:
-- **Vitest:** Ejecutar pruebas unitarias e integración para validar la lógica de Prisma, validadores Zod y el comportamiento del servidor MCP.
-- **Playwright:** Ejecutar pruebas E2E para comprobar los flujos interactivos en la interfaz web de Next.js.
-- **Verificación completa:** Antes de cerrar una tarea, ejecuta `npm run lint`, `npm run typecheck`, `npm test` y `npm run test:e2e` (este último carga `.env` por sí solo y necesita el puerto 3000 libre).
+## 4. Protocolo de Testing (Proporcional al Cambio)
+
+La cobertura de pruebas se exige en proporción al riesgo y al tipo de cambio, no por defecto:
+
+- **Cambios puramente presentacionales** (estilos, textos, layout, componentes sin lógica): no requieren tests nuevos. Verificación mínima: `npm run lint` y `npm run typecheck`, más una revisión visual si aplica. No ejecutar `npm test` ni `npm run test:e2e`.
+- **Cambios de comportamiento** (Prisma, validadores Zod, Server Actions, tools MCP, contratos de API): añadir o actualizar tests unitarios/integración en la capa afectada y ejecutar únicamente esos tests con Vitest.
+- **Playwright (E2E)** solo para flujos de usuario críticos que el cambio toque (autenticación, CRUD principal, protección de rutas). No se ejecuta la suite E2E por cambios que no los afecten.
+- **No se ejecuta la suite completa por defecto.** Cada cambio corre solo el subconjunto relevante; la verificación completa (`npm run lint`, `npm run typecheck`, `npm test`, `npm run test:e2e`) se reserva para hitos o antes de un release. `npm run test:e2e` carga `.env` por sí solo y necesita el puerto 3000 libre.
 
 <!-- BEGIN:nextjs-agent-rules -->
 

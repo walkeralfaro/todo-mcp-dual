@@ -57,6 +57,7 @@ El esquema también incluye las entidades de autenticación de Better Auth (`Use
    - La aplicación de tareas vive en `/tareas`: exige sesión y, sin ella, redirige a `/?auth=login&next=<ruta>` conservando la ruta pedida para volver tras autenticarse.
    - Página de tokens MCP en `/mcp`, también protegida.
    - Navbar compartida en todas las rutas con el estado de sesión (iniciar sesión, registrarse y cerrar sesión).
+   - Pie de página global en las rutas del layout (`/`, `/tareas` y `/mcp`) con el crédito "developed with ❤️ by walker alfaro", anclado al borde inferior del viewport con contenido corto y al final del documento cuando hay scroll.
 5. **Tokens MCP:**
    - Generación bajo demanda en `/mcp` (solo con sesión): valor en claro `tmcp_…` mostrado una única vez; se persisten el hash SHA-256 (`mcp_token.token`) y el prefijo visible (`tokenPrefix`).
    - Expiración por defecto de 90 días y `lastUsedAt` actualizado en cada uso autenticado.
@@ -67,14 +68,14 @@ El esquema también incluye las entidades de autenticación de Better Auth (`Use
 
 ## 5. Estrategia de Calidad y Testing
 
-El ciclo de desarrollo exigirá pruebas automatizadas obligatorias antes de dar por completada cada etapa:
+La cobertura de pruebas es proporcional al cambio (ver `AGENTS.md` §4): los cambios de comportamiento requieren tests unitarios/integración, mientras que los cambios puramente presentacionales no requieren tests nuevos.
 
 - **Pruebas Unitarias e Integración (Vitest):**
   - Validación de esquemas Zod en las herramientas MCP.
   - Pruebas de la capa de servicios de Prisma con SQLite.
   - Simulación de llamadas al manejador de la ruta MCP.
 - **Pruebas End-to-End - E2E (Playwright):**
-  - Pruebas de flujo completo en navegador: Creación, listado y actualización de tareas desde la interfaz gráfica de Next.js.
+  - Pruebas de flujo completo en navegador: Creación, listado y actualización de tareas desde la interfaz gráfica de Next.js, solo para los flujos críticos que el cambio afecte.
 
 ---
 

@@ -26,12 +26,6 @@ export default async function McpPage() {
 
       <McpTokens initialTokens={result.tokens} />
       <ConnectionGuide />
-
-      <footer>
-        <p className="text-[13px] text-muted">
-          Todo App · UI y MCP sobre la misma base.
-        </p>
-      </footer>
     </div>
   );
 }
